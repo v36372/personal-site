@@ -8,6 +8,12 @@
   make deploy to upload a private preview. Python dependencies use uv.lock.
 - Drafts default to true, are visibly labeled, and are excluded from RSS and
   sitemap. make build excludes drafts; make preview includes them.
+- Current design inspiration: ludwigabap.com (compact warm monospace UI and
+  bookmarks browsing). All CSS, templates, and scripts are original.
+- Tin chose 'Set up tab first': content/bookmarks.json is intentionally empty.
+  Do not fabricate bookmarks or fetch private collections without a supplied
+  source/authorization. Private preview shows all entries; published builds
+  show only bookmarks explicitly marked publish=true.
 - Lucumr is design inspiration only. Its repository is not open source; do not
   copy its code, templates, assets, fonts, or posts.
 - The exe integration at https://exe.int.exe.xyz/exec provides owner-authenticated

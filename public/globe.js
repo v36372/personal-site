@@ -17,6 +17,22 @@ let paused = reducedMotion.matches;
 let destroyed = false;
 const view = { ...HOME_VIEW };
 
+function globeAppearance() {
+  const style = getComputedStyle(document.documentElement);
+  const rgb = (property) => {
+    const hex = style.getPropertyValue(property).trim().replace('#', '');
+    return [0, 2, 4].map(offset => parseInt(hex.slice(offset, offset + 2), 16) / 255);
+  };
+  const light = document.documentElement.dataset.theme === 'light';
+  return {
+    dark: light ? 0 : 1,
+    mapBrightness: light ? 1.6 : 6,
+    baseColor: light ? [0.76, 0.79, 0.71] : [0.9, 0.85, 0.72],
+    markerColor: rgb('--pin'),
+    glowColor: rgb('--paper'),
+  };
+}
+
 function stop() {
   cancelAnimationFrame(frame);
   frame = 0;
@@ -84,13 +100,9 @@ try {
     height: size,
     devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
     context,
-    dark: 0,
+    ...globeAppearance(),
     diffuse: 1.4,
     mapSamples: 16000,
-    mapBrightness: 1.6,
-    baseColor: [0.76, 0.79, 0.71],
-    markerColor: [0.74, 0.45, 0.33],
-    glowColor: [0.973, 0.969, 0.953],
     // No bindable IDs: the label uses our projection instead of CSS anchors,
     // keeping it compatible with browsers without anchor positioning.
     markers: [{ location: HOME_LOCATION, size: 0.055 }],
@@ -120,6 +132,7 @@ try {
     if (document.hidden) stop();
     else schedule();
   });
+  window.addEventListener('themechange', () => { if (!destroyed) globe.update(globeAppearance()); });
   canvas.addEventListener('webglcontextlost', unavailable);
   window.addEventListener('pagehide', (event) => {
     stop();

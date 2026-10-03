@@ -1,17 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="warm">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="{{ description }}">
-  <meta name="theme-color" content="#f8f7f3">
+  <meta name="theme-color" content="#282722">
   {% if preview or noindex %}<meta name="robots" content="noindex, nofollow">{% endif %}
   <title>{{ title }} — Tin Nguyen</title>
   <link rel="canonical" href="{{ site_url }}{{ path }}">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="/theme.js"></script>
   <link rel="stylesheet" href="/site.css">
   <link rel="alternate" type="application/rss+xml" title="Tin Nguyen's writing" href="/feed.xml">
   {% if has_globe %}<script type="module" src="/globe.js"></script>{% endif %}
+  {% if has_bookmarks %}<script type="module" src="/bookmarks.js"></script>{% endif %}
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -21,10 +23,14 @@
         <a class="site-name" href="/">Tin Nguyen<span class="name-period">.</span></a>
         <span class="site-tagline">A personal notebook</span>
       </div>
-      {% if preview %}<span class="preview-status"><span aria-hidden="true">◦</span> Private preview</span>{% endif %}
+      <div class="header-actions">
+        {% if preview %}<span class="preview-status"><span aria-hidden="true">◦</span> Private preview</span>{% endif %}
+        <button class="theme-control" id="theme-control" type="button" hidden>Theme: Warm</button>
+      </div>
     </header>
     <nav class="site-nav" aria-label="Main navigation">
       <a href="/"{% if active == 'writing' %} aria-current="page"{% endif %}>Writing</a>
+      <a href="/bookmarks/"{% if active == 'bookmarks' %} aria-current="page"{% endif %}>Bookmarks <span class="nav-count" aria-hidden="true">{{ bookmarks|length }}</span></a>
       <a href="/archive/"{% if active == 'archive' %} aria-current="page"{% endif %}>Archive</a>
       <a href="/about/"{% if active == 'about' %} aria-current="page"{% endif %}>About</a>
       <a class="feed-link" href="/feed.xml">RSS <span aria-hidden="true">↗</span></a>

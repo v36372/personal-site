@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-heading library-heading">
+  <p class="eyebrow">The reading shelf</p>
+  <h1>Bookmarks</h1>
+  <p>Saved links, articles, videos, and references. All in one place.</p>
+</header>
+<div class="bookmark-controls" id="bookmark-controls" hidden>
+  <div class="bookmark-search-row">
+    <label class="bookmark-search-label" for="bookmark-search">Search saved links</label>
+    <input type="search" id="bookmark-search" placeholder="Search titles, sites, notes, or tags…" autocomplete="off">
+    <label class="visually-hidden" for="bookmark-tag">Filter by tag</label>
+    <select id="bookmark-tag"><option value="">All tags</option>{% for tag in bookmark_tags %}<option value="{{ tag }}">{{ tag }}</option>{% endfor %}</select>
+  </div>
+  <div class="bookmark-toolbar">
+    <div class="bookmark-type-tabs" role="group" aria-label="Bookmark types">
+      <button type="button" data-kind="all" aria-pressed="true">All <span>{{ bookmarks|length }}</span></button>
+      {% for kind, label, count in bookmark_kinds %}<button type="button" data-kind="{{ kind }}" aria-pressed="false">{{ label }} <span>{{ count }}</span></button>{% endfor %}
+    </div>
+    <div class="bookmark-view-tabs" role="group" aria-label="Bookmark view">
+      <button type="button" data-view="list" aria-pressed="true">List</button>
+      <button type="button" data-view="timeline" aria-pressed="false">Timeline</button>
+    </div>
+  </div>
+</div>
+<p class="bookmark-stats" id="bookmark-stats" role="status" aria-live="polite">{{ bookmarks|length }} saved {{ 'link' if bookmarks|length == 1 else 'links' }}{% if bookmarks %} · newest first{% endif %}</p>
+{% if bookmarks %}
+<div id="bookmark-collection" class="bookmark-collection" data-view="list">
+  {% for month, label, items in bookmark_groups %}
+  <section class="bookmark-group" aria-labelledby="month-{{ month }}">
+    <div class="bookmark-group-heading"><h2 id="month-{{ month }}">{{ label }}</h2><span class="bookmark-group-count">{{ items|length }}</span></div>
+    {% include "_bookmark-rows.html" %}
+  </section>
+  {% endfor %}
+</div>
+<p class="bookmark-no-results" id="bookmark-no-results" hidden>No bookmarks match those filters. <button type="button" id="bookmark-clear">Clear filters</button></p>
+<noscript><p class="section-note">Every bookmark is listed below. Search and filters need JavaScript.</p></noscript>
+{% else %}
+<div class="bookmark-empty" id="bookmark-empty">
+  <span class="empty-mark" aria-hidden="true">[ ]</span>
+  <h2>{% if preview %}No bookmarks imported yet.{% else %}No bookmarks shared yet.{% endif %}</h2>
+  <p>{% if preview %}Your saved links will appear here when you add or import your collection.{% else %}Saved links will appear here when they are ready to share.{% endif %}</p>
+</div>
+{% endif %}
+{% endblock %}

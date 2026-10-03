@@ -3,23 +3,36 @@
 <section class="introduction" aria-labelledby="intro-title">
   <div class="intro-copy">
     <p class="eyebrow">A little corner of the internet</p>
-    <h1 id="intro-title">Notes, essays,<br>and things in between.</h1>
-    <p>I'm Tin Nguyen, based in Ho Chi Minh City, Vietnam.<br class="desktop-break"> This is a home for my writing.</p>
+    <h1 id="intro-title">Writing &amp; bookmarks.</h1>
+    <p>I'm Tin Nguyen, based in Ho Chi Minh City, Vietnam. This is a home for my writing and the things I save along the way.</p>
+    <p class="intro-links"><a href="/about/">About me</a><span aria-hidden="true"> / </span><a href="/bookmarks/">The reading shelf</a></p>
   </div>
   {% include "_globe.html" %}
 </section>
-<section class="writing-section" aria-labelledby="writing-title">
-  <div class="section-heading"><h2 id="writing-title">Latest writing</h2><a href="/archive/">View archive <span aria-hidden="true">→</span></a></div>
-  {% if published %}
-    {% with entries=published[:8] %}{% include "_post-list.html" %}{% endwith %}
-  {% else %}
-    <div class="empty-state"><p>No published posts yet.</p><p>This notebook is just getting started. The first entry will appear here.</p></div>
-  {% endif %}
-</section>
-{% if drafts %}
-<section class="draft-section" aria-labelledby="draft-title">
-  <div class="section-heading"><h2 id="draft-title">On the desk</h2><span class="section-note">Private drafts</span></div>
-  {% with entries=drafts %}{% include "_post-list.html" %}{% endwith %}
-</section>
-{% endif %}
+<div class="home-columns">
+  <div>
+    <section class="writing-section" aria-labelledby="writing-title">
+      <div class="section-heading"><h2 id="writing-title">Recent writing</h2><a href="/archive/">All writing →</a></div>
+      {% if published %}
+        {% with entries=published[:5] %}{% include "_post-list.html" %}{% endwith %}
+      {% else %}
+        <div class="empty-state"><p>No published posts yet.</p><p>The first entry will appear here.</p></div>
+      {% endif %}
+    </section>
+    {% if drafts %}
+    <section class="draft-section" aria-labelledby="draft-title">
+      <div class="section-heading"><h2 id="draft-title">On the desk</h2><span class="section-note">Drafts</span></div>
+      {% with entries=drafts %}{% include "_post-list.html" %}{% endwith %}
+    </section>
+    {% endif %}
+  </div>
+  <section class="saved-section" aria-labelledby="saved-title">
+    <div class="section-heading"><h2 id="saved-title">Recently saved</h2><a href="/bookmarks/">All {{ bookmarks|length }} →</a></div>
+    {% if bookmarks %}
+      {% with items=bookmarks[:5] %}{% include "_bookmark-rows.html" %}{% endwith %}
+    {% else %}
+      <div class="empty-state"><p>No bookmarks imported yet.</p><p>A place for the links worth keeping.</p></div>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

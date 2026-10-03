@@ -1,0 +1,10 @@
+<ul class="bookmark-rows">
+  {% for item in items %}
+  <li class="bookmark-row" data-kind="{{ item.kind }}" data-tags='{{ item.tags|tojson }}' data-search="{{ (item.title ~ ' ' ~ item.url ~ ' ' ~ item.note ~ ' ' ~ (item.tags|join(' ')))|lower }}">
+    <div class="bookmark-meta"><span class="kind-dot kind-dot--{{ item.kind }}" aria-hidden="true"></span><span>{{ item.kind }}</span><span aria-hidden="true">·</span><span>{{ item.domain }}</span>{% if item.saved %}<time datetime="{{ item.saved.isoformat() }}">{{ item.saved.isoformat() }}</time>{% endif %}</div>
+    <a class="bookmark-title" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }} <span aria-hidden="true">↗</span></a>
+    {% if item.note %}<p class="bookmark-note">{{ item.note }}</p>{% endif %}
+    {% if item.tags or (preview and not item.publish) %}<div class="bookmark-tags">{% for tag in item.tags %}<span>{{ tag }}</span>{% endfor %}{% if preview and not item.publish %}<span class="private-link-label">private</span>{% endif %}</div>{% endif %}
+  </li>
+  {% endfor %}
+</ul>

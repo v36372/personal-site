@@ -14,7 +14,9 @@ test: preview
 	uv run --locked python -m unittest discover -s tests -v
 	node --test tests/globe.test.mjs
 	node --check public/globe.js
-	python3 -m py_compile scripts/build.py scripts/serve.py scripts/deploy.py
+	node --check public/theme.js
+	node --check public/bookmarks.js
+	python3 -m py_compile scripts/build.py scripts/bookmarks.py scripts/serve.py scripts/deploy.py
 	bash -n ops/bootstrap.sh
 
 deploy: test

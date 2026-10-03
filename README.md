@@ -1,9 +1,11 @@
 # Tin Nguyen — a personal notebook
 
-A text-first, Markdown-authored blog with an original design inspired by
-[lucumr](https://github.com/mitsuhiko/lucumr): dated entries, readable articles,
-a chronological archive, topic pages, and an RSS feed. The COBE globe remains
-as a small location detail beside the introduction and on the About page.
+A compact personal notebook inspired by [ludwigabap.com](https://ludwigabap.com/):
+warm monospace UI, writing and bookmarks tabs, dense saved-link lists, search,
+filters, and timeline browsing. Readable Markdown articles, archives, topics,
+and RSS remain from the earlier lucumr-inspired blog. The small COBE globe marks
+Ho Chi Minh City on the introduction and About page. Warm/light/dark themes are
+saved locally; there are no third-party fonts, analytics, or runtime requests.
 
 Lucumr's repository is **not open source**. None of its code, templates, fonts,
 assets, or posts have been copied. This implementation is independent.
@@ -74,9 +76,47 @@ quotes, fenced code blocks, and tables are supported. Raw HTML is escaped.
 Navigation, year groups, topic pages, reading times, and feeds are generated
 from the posts. No manual index editing is needed.
 
+## Bookmarks
+
+Tin chose to **set up the tab first**. The collection is intentionally empty;
+no bookmarks have been invented, copied from the reference, or fetched from an
+account. A browser/service export can be imported later when supplied.
+
+The source is `content/bookmarks.json`, an array of saved-link objects. For
+example, this describes the schema (it is not an actual saved bookmark):
+
+```json
+[
+  {
+    "title": "An article I saved",
+    "url": "https://example.org/article",
+    "kind": "article",
+    "saved": "2026-10-03",
+    "tags": ["Reading"],
+    "note": "An optional personal note.",
+    "publish": false
+  }
+]
+```
+
+- Kinds: `link` (default), `article`, `video`, `paper`.
+- Dates are optional; unknown dates remain unrecorded, never fabricated.
+- Every entry is rendered, not only the latest 200. Search covers titles, URLs,
+  notes, and tags. Type/tag filters and list/timeline views work locally in the
+  browser. Without JavaScript, the full list remains readable.
+- Imported links default to **private** (`publish: false`). Private preview
+  includes them all. `make build` includes only explicitly reviewed links with
+  `publish: true`, avoiding accidental publication of a personal collection.
+- The raw JSON file is not uploaded. Bookmark links never enter the writing RSS
+  feed. HTTP(S) only; embedded credentials and executable URLs are rejected.
+- To add/change entries, edit the JSON and run `make deploy`. No changes to
+  website visibility occur.
+
 ## Layout and files
 
 - `content/posts/`: editable Markdown posts
+- `content/bookmarks.json`: saved links (currently an empty collection)
+- `scripts/bookmarks.py`: bookmark validation and safe privacy defaults
 - `templates/`: original Jinja templates; edit `about.html` for the About page
 - `public/`: CSS, favicon, and self-hosted globe assets only
 - `scripts/build.py`: Markdown-to-HTML generator

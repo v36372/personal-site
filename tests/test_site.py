@@ -36,7 +36,7 @@ class SiteTests(unittest.TestCase):
         for path in pages:
             with self.subTest(page=str(path.relative_to(OUTPUT))):
                 page = Page(path.read_text())
-                self.assertIn(('html', {'lang': 'en'}), page.tags)
+                self.assertTrue(any(tag == 'html' and attrs.get('lang') == 'en' for tag, attrs in page.tags))
                 self.assertTrue(any(tag == 'title' for tag, _ in page.tags))
                 self.assertTrue(any(tag == 'main' for tag, _ in page.tags))
                 self.assertTrue(any(attrs.get('name') == 'viewport' for _, attrs in page.tags))
@@ -77,7 +77,7 @@ class SiteTests(unittest.TestCase):
         self.assertEqual([item.findtext('title') for item in items], [post.title for post in self.published[:20]])
         sitemap = ET.parse(OUTPUT / 'sitemap.xml')
         urls = [node.text for node in sitemap.findall('.//{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
-        expected = ['/', '/archive/', '/about/'] + [post.url for post in self.published]
+        expected = ['/', '/archive/', '/about/', '/bookmarks/'] + [post.url for post in self.published]
         expected += ['/tags/' + tag_slug(tag) + '/' for tag in sorted({tag for post in self.published for tag in post.tags})]
         self.assertEqual(urls, ['https://tinnguyen.exe.xyz' + path for path in expected])
         for post in self.drafts:

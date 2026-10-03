@@ -16,6 +16,11 @@ import xml.etree.ElementTree as ET
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 from markdown_it import MarkdownIt
 
+if __package__:
+    from .bookmarks import KINDS, load_bookmarks
+else:
+    from bookmarks import KINDS, load_bookmarks
+
 ROOT = Path(__file__).resolve().parents[1]
 SITE_URL = "https://tinnguyen.exe.xyz"
 ATOM = "http://www.w3.org/2005/Atom"
@@ -136,6 +141,13 @@ def build(root=ROOT, output=None, include_drafts=False):
     ):
         raise ValueError("Output must not overwrite the project or its source directories")
     all_posts = load_posts(root)
+    all_bookmarks = load_bookmarks(root)
+    bookmarks = [item for item in all_bookmarks if include_drafts or item.publish]
+    bookmark_tags = sorted({tag for item in bookmarks for tag in item.tags}, key=str.casefold)
+    bookmark_kinds = [(kind, label, sum(item.kind == kind for item in bookmarks)) for kind, label in KINDS]
+    bookmark_groups = [(month, next(item.month_label for item in bookmarks if item.month == month),
+                        [item for item in bookmarks if item.month == month])
+                       for month in dict.fromkeys(item.month for item in bookmarks)]
     published = [post for post in all_posts if not post.draft]
     drafts = [post for post in all_posts if post.draft] if include_drafts else []
     selected = [post for post in all_posts if include_drafts or not post.draft]
@@ -145,7 +157,8 @@ def build(root=ROOT, output=None, include_drafts=False):
                       trim_blocks=True, lstrip_blocks=True)
     env.globals["tag_slug"] = tag_slug
     context = {"site_url": SITE_URL, "year": date.today().year, "preview": include_drafts,
-               "noindex": False, "has_globe": False, "active": "", "published": published,
+               "noindex": False, "has_globe": False, "has_bookmarks": False,
+               "active": "", "published": published, "bookmarks": bookmarks,
                "drafts": drafts, "tags": tags,
                "description": "Tin Nguyen's personal blog. Based in Ho Chi Minh City, Vietnam."}
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -166,6 +179,9 @@ def build(root=ROOT, output=None, include_drafts=False):
                   for year in sorted({post.date.year for post in selected}, reverse=True)]
         render("archive.html", "/archive/", title="Archive", active="archive", groups=groups)
         render("about.html", "/about/", title="About", active="about", has_globe=True)
+        render("bookmarks.html", "/bookmarks/", title="Bookmarks", active="bookmarks",
+               has_bookmarks=True, bookmark_groups=bookmark_groups,
+               bookmark_tags=bookmark_tags, bookmark_kinds=bookmark_kinds)
         render("404.html", "/404.html", title="Page not found", noindex=True)
         for index, post in enumerate(selected):
             render("post.html", post.url, title=post.title, description=post.description,
@@ -180,7 +196,7 @@ def build(root=ROOT, output=None, include_drafts=False):
         ET.register_namespace("", SITEMAP)
         sitemap = ET.Element(f"{{{SITEMAP}}}urlset")
         published_tags = sorted({tag for post in published for tag in post.tags})
-        urls = ["/", "/archive/", "/about/"] + [post.url for post in published]
+        urls = ["/", "/archive/", "/about/", "/bookmarks/"] + [post.url for post in published]
         urls += [f"/tags/{tag_slug(tag)}/" for tag in published_tags]
         for path in urls:
             ET.SubElement(ET.SubElement(sitemap, f"{{{SITEMAP}}}url"), f"{{{SITEMAP}}}loc").text = SITE_URL + path
