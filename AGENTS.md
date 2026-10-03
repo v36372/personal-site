@@ -4,23 +4,25 @@
 - Repository: v36372/personal-site (public). Do not commit private exports,
   confidential drafts/bookmarks, credentials, or runner state. Website-private
   visibility does NOT hide the GitHub source.
-- Hosting: private Cloudflare Pages at tinnguyen.pages.dev. Native GitHub
-  integration builds main with bash ops/pages-build.sh, output dist/.
-  Branch/PR previews are disabled. GitHub Actions runs checks on hosted runners.
-- Access app 1add1fd3-ef6b-4897-ac60-390c5b60440b protects BOTH
-  tinnguyen.pages.dev and *.tinnguyen.pages.dev with owner-only Google login.
-  Keep it enabled; all generated production deployment URLs must stay private.
-- Legacy tinnguyen.exe.xyz is a private rollback copy. The tinnguyen-ci runner
-  is stopped, not deleted. Never execute untrusted PR code on that VM.
+- Hosting: ONE private exeslim VM, tinnguyen.exe.xyz, nginx on port 8000.
+  tinnguyen-ci has been DELETED; its deploy integration/key revoked. Do not
+  recreate a CI VM or register a runner on the website/BB VM.
+- GitHub Actions checks PRs/main on hosted runners. The website VM polls ONLY
+  v36372/personal-site main every minute via tinnguyen-update.timer, runs all
+  tests then a reviewed-content build, and atomically swaps nginx releases.
+  Never fetch/run PR or fork code on the website or BB VM.
+- Cloudflare auto-deployment is DISABLED. The old Pages project remains private
+  under Access app 1add1fd3-ef6b-4897-ac60-390c5b60440b (root AND wildcard).
+  Do not remove its protection or silently reactivate dual hosting.
 - This is an original Markdown blog: edit content/posts/ for writing, templates/
   for layouts, and public/ for assets. dist/ is generated; never edit it.
-- Run make dev for local auto-rebuilding previews, make test for checks, and
-  git push origin main for Pages auto-deployment. make deploy verifies Access
-  and rebuilds committed GitHub main, not local changes. See README.md.
-  Python dependencies use uv.lock.
+- Run make dev for local previews, make test for checks, and git push origin
+  main for automatic VM updates. make deploy tests then rebuilds reviewed
+  content and uploads local dist/ via the owner exe integration. make setup-vm
+  also bootstraps nginx/tooling. Dependencies use uv.lock; see README.md.
 - Drafts default to true and stay out of RSS/sitemap. make preview labels them
-  for LOCAL review only. Pages runs make test then make build, serving only
-  reviewed posts/bookmarks; never publish sample drafts to hide their labels.
+  for LOCAL review only. Deployments MUST run make build AFTER make test;
+  never upload the tests' draft preview or relabel specimen content as finished.
 - No visible work-in-progress chrome: no favicon, Private preview badge,
   art buttons, placeholder/future-tense empty states, or unfinished About copy.
   Removing that chrome is NOT permission to make the website public.
@@ -38,9 +40,10 @@
 - Keep the website PRIVATE while Tin is editing. Do not enable public access
   or create share links unless Tin explicitly asks to publish/share it.
   Deployments must preserve the existing private visibility.
-- Pages serves generated dist/ only; public/_headers preserves the CSP.
-  Do not expose the source root or admin/dev servers. The legacy VM serves only
-  /srv/tinnguyen/current on nginx port 8000 through its private HTTPS proxy.
+- nginx serves ONLY /srv/tinnguyen/current, generated HTML/assets, on port 8000
+  behind exe.dev owner-only authentication. No source root, exports, dev servers
+  or updater HTTP endpoints. Preserve CSP, noindex, relative redirects, gzip
+  and pinned-vendor caching. Never change private sharing while deploying.
 - No Archive page, navigation, or sitemap entry. /archive and /archive/
   redirect permanently to /. The writing index lists ALL published posts.
 - Confirmed location: Ho Chi Minh City, Vietnam (10.8231, 106.6297). The
@@ -55,6 +58,7 @@
   lazy offscreen initialization, and bounded 15fps rendering at 0.35x speed.
   Shader sources are pinned from Aura; retain MIT/Apache notices when editing.
 - Do not invent personal biography, social links, projects, or contact details.
-- Develop here; no exe.dev VM is needed to build or serve the Pages deployment.
-  Account/project IDs are configuration, not secrets. API credentials are
-  vault-backed via cloudflare.int.exe.xyz; never commit or log tokens.
+- Develop here. Auto-updates build on the website VM, not on a second CI VM.
+  Its personal-site-status integration allows ONLY read-only share inspection;
+  no management, shell, GitHub or deployment token is needed there. Credentials
+  stay vaulted; never commit/log tokens. Renew its 1-year key before expiry.

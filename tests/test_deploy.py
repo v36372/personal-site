@@ -1,8 +1,11 @@
 import io
 import json
+from pathlib import Path
+import tempfile
+import types
 import unittest
 from unittest.mock import patch
-from scripts.deploy import ensure_private
+from scripts.deploy import deploy, ensure_private, remote
 
 
 class DeploymentPrivacyTests(unittest.TestCase):
@@ -27,6 +30,26 @@ class DeploymentPrivacyTests(unittest.TestCase):
         urlopen.return_value = io.BytesIO(b'{}')
         with self.assertRaises(RuntimeError):
             ensure_private(False)
+
+    @patch('scripts.deploy.subprocess.run')
+    def test_local_deployment_uses_no_ssh_or_management_api(self, run):
+        run.return_value = types.SimpleNamespace(returncode=0, stdout='local output', stderr='')
+        self.assertEqual(remote('echo local', local=True), 'local output')
+        self.assertEqual(run.call_args.args[0], ['bash', '-s'])
+        self.assertTrue(run.call_args.kwargs['input'].startswith('set -euo pipefail'))
+
+    @patch('scripts.deploy.ensure_private')
+    @patch('scripts.deploy.remote')
+    def test_preview_artifacts_are_never_uploaded(self, upload, private):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'dist').mkdir()
+            (root / 'dist/index.html').write_text('draft preview')
+            (root / 'dist/robots.txt').write_text('User-agent: *\nDisallow: /\n')
+            with patch('scripts.deploy.ROOT', root):
+                with self.assertRaisesRegex(RuntimeError, 'Draft preview deployment refused'):
+                    deploy(False)
+        upload.assert_not_called()
 
 
 if __name__ == '__main__':

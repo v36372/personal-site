@@ -1,4 +1,4 @@
-.PHONY: build preview dev test deploy deploy-vm setup-vm
+.PHONY: build preview dev test deploy deploy-vm deploy-pages setup-vm
 UV ?= uv
 
 build:
@@ -7,7 +7,7 @@ build:
 preview:
 	$(UV) run --locked python scripts/build.py --include-drafts
 
-# Local-only server with automatic rebuilds; Pages serves generated HTML.
+# Local-only server with automatic rebuilds; nginx serves generated HTML.
 dev:
 	$(UV) run --locked python scripts/serve.py
 
@@ -21,15 +21,19 @@ test: preview
 	node --check public/dither-settings.js
 	node --check public/vendor/aura-capy-shaders.js
 	python3 -m py_compile scripts/build.py scripts/bookmarks.py scripts/serve.py scripts/deploy.py scripts/deploy_pages.py
-	bash -n ops/bootstrap.sh ops/runner-bootstrap.sh ops/pages-build.sh
+	bash -n ops/bootstrap.sh ops/vm-update.sh ops/pages-build.sh
 
-# Native Pages builds GitHub main; uncommitted local files are not uploaded.
+# Always regenerate reviewed content after tests; never deploy their draft preview.
 deploy: test
-	python3 scripts/deploy_pages.py
-
-# Explicit legacy-VM rollback only; no automatic VM deployment.
-deploy-vm: test
+	$(MAKE) build
 	python3 scripts/deploy.py
 
+deploy-vm: deploy
+
 setup-vm: test
+	$(MAKE) build
 	python3 scripts/deploy.py --setup
+
+# Explicit Cloudflare rollback only; native auto-deploy is disabled.
+deploy-pages: test
+	python3 scripts/deploy_pages.py

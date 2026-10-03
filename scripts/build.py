@@ -23,7 +23,7 @@ else:
     from bookmarks import KINDS, load_bookmarks
 
 ROOT = Path(__file__).resolve().parents[1]
-SITE_URL = os.environ.get("SITE_URL", "https://tinnguyen.pages.dev").rstrip("/")
+SITE_URL = os.environ.get("SITE_URL", "https://tinnguyen.exe.xyz").rstrip("/")
 ATOM = "http://www.w3.org/2005/Atom"
 SITEMAP = "http://www.sitemaps.org/schemas/sitemap/0.9"
 MARKDOWN = MarkdownIt("commonmark", {"html": False}).enable("table")

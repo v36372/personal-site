@@ -20,11 +20,12 @@ VM = "tinnguyen"
 API = os.environ.get("EXE_API_URL", "https://exe.int.exe.xyz/exec")
 
 
-def remote(script, use_ssh=False):
+def remote(script, use_ssh=False, local=False):
     script = "set -euo pipefail\n" + script
-    if use_ssh:
+    if local or use_ssh:
+        command = ["bash", "-s"] if local else ["ssh", VM + ".exe.xyz", "bash -s"]
         result = subprocess.run(
-            ["ssh", VM + ".exe.xyz", "bash -s"],
+            command,
             input=script, text=True, capture_output=True, timeout=45,
         )
         if result.returncode:
@@ -94,12 +95,14 @@ def ensure_private(use_ssh):
         raise RuntimeError("Deployment refused: keep tinnguyen private while editing. No access settings were changed.")
 
 
-def deploy(use_ssh):
+def deploy(use_ssh, local=False):
     ensure_private(use_ssh)
     buffer = io.BytesIO()
     public = ROOT / "dist"
     if not (public / "index.html").is_file():
-        raise RuntimeError("No generated site found. Run make preview or make build first.")
+        raise RuntimeError("No generated site found. Run make build first.")
+    if "Disallow: /" in (public / "robots.txt").read_text():
+        raise RuntimeError("Draft preview deployment refused. Run make build after tests.")
     with tarfile.open(fileobj=buffer, mode="w:gz") as archive:
         for path in sorted(public.rglob("*")):
             if path.is_symlink():
@@ -125,19 +128,28 @@ sudo systemctl enable --now nginx
 sudo systemctl reload nginx
 curl -fsS http://127.0.0.1:8000/ >/dev/null
 printf 'Deployed release: {release}\n'
-""", use_ssh))
+""", use_ssh, local=local))
     print("Site: https://tinnguyen.exe.xyz/")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--setup", action="store_true", help="Install nginx before deploying (first run).")
-    parser.add_argument("--ssh", action="store_true", help="Use owner SSH access instead of the exe integration.")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--ssh", action="store_true", help="Use owner SSH access instead of the exe integration.")
+    mode.add_argument("--local", action="store_true", help="Deploy locally on the website VM; still requires its read-only privacy integration.")
+    parser.add_argument("--check", action="store_true", help="Verify private VM visibility without deploying.")
     args = parser.parse_args()
+    if args.setup and args.local:
+        parser.error("Run --setup from the owner/BB machine, not the local updater.")
     try:
+        if args.check:
+            ensure_private(args.ssh)
+            print("Website VM is private.")
+            return
         if args.setup:
             bootstrap(args.ssh)
-        deploy(args.ssh)
+        deploy(args.ssh, local=args.local)
     except (RuntimeError, OSError, ValueError) as error:
         parser.exit(1, str(error) + "\n")
 

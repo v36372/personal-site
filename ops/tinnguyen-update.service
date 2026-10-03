@@ -1,0 +1,12 @@
+[Unit]
+Description=Test and atomically deploy trusted personal-site main
+Wants=network-online.target
+After=network-online.target nginx.service
+
+[Service]
+Type=oneshot
+User=exedev
+WorkingDirectory=/home/exedev
+ExecStart=/bin/bash /usr/local/libexec/tinnguyen-update
+TimeoutStartSec=600
+UMask=0022

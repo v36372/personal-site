@@ -17,19 +17,16 @@ assets, or posts have been copied. This implementation is independent.
 - Repository: https://github.com/v36372/personal-site (**public source code**)
 - BB project: `tinnguyen` (`proj_p965in7xju`)
 - Source: `/home/exedev/codes/tinnguyen` on `v36372-bb`
-- Website (owner-only Access): https://tinnguyen.pages.dev/
-- Hosting: Cloudflare Pages; assets served from Cloudflare's global edge
-- Build: native Pages GitHub integration, `main` → `bash ops/pages-build.sh` → `dist/`
-- Account: `700a6c6ad6178d92f1abcf67630f3a95`; project: `tinnguyen`
-- Legacy VM: `tinnguyen.exe.xyz`, kept private as a rollback copy only
+- Website: https://tinnguyen.exe.xyz/ (**private**, exe.dev owner login)
+- Hosting: one exeslim VM in Singapore, 1 CPU / 2GB RAM / 10GB disk
+- Updates: trusted GitHub `main` → tests → reviewed build → atomic nginx release
+- Checks: GitHub-hosted runners; **no dedicated CI VM**
+- Previous Pages project: retained privately, automatic deployments disabled
 
-**Keep the site private until Tin explicitly asks to publish.** Cloudflare
-Access requires the owner's existing Google login. Its application protects
-**both** `tinnguyen.pages.dev` and `*.tinnguyen.pages.dev`, including immutable
-deployment URLs. Anonymous requests redirect to Access; previews are disabled.
-The rebuild helper verifies owner-only policies and anonymous login redirects
-before deploying and never changes access settings. `noindex` is not a privacy
-barrier; keep Access enabled even though the source repository is public.
+**Keep the site private until Tin explicitly asks to publish.** exe.dev gates
+the HTTPS proxy; nginx serves only generated HTML/assets on port 8000. Deploys
+check private sharing and never change visibility. `noindex` is not an access
+barrier. GitHub source remains public even though the website is private.
 
 The starter article remains an unpublished, source-only layout specimen. It is
 not included in the deployed site. No biography or published writing is invented.
@@ -39,9 +36,9 @@ copy. Empty collections use neutral messages rather than promises of future cont
 ## Local development
 
 Requirements on the development machine: Python 3.11+, `uv`, and Node.js 22.7+.
-Cloudflare's v3 build image uses Python 3.12 and Node 22.20.0;
-`ops/pages-build.sh` installs pinned uv 0.12.7 and runs the same tests locally
-and on Pages. Python dependencies are pinned in `uv.lock`.
+The VM uses Python 3.12, verified Node 24.20.0, and pinned uv 0.12.7.
+GitHub checks use Python 3.12 / Node 22.20.0. Both run the same suite.
+Python dependencies are pinned in `uv.lock`.
 
 ```sh
 uv sync --locked
@@ -131,9 +128,10 @@ example, this describes the schema (it is not an actual saved bookmark):
 - `scripts/build.py`: Markdown-to-HTML generator
 - `scripts/serve.py`: local preview server with automatic rebuilds
 - `public/_headers`: Pages security headers, CSP, noindex, and pinned-vendor caching
-- `ops/pages-build.sh`: native Pages build and full test command
-- `scripts/deploy_pages.py`: owner-only Access check and committed-main rebuild
-- `scripts/deploy.py`: legacy VM uploader with private-visibility guard
+- `ops/bootstrap.sh`: verified VM tooling and nginx installation
+- `ops/vm-update.sh`, `ops/tinnguyen-update.*`: trusted-main update service/timer
+- `scripts/deploy.py`: atomic uploader/local updater with private-visibility guard
+- `ops/pages-build.sh`, `scripts/deploy_pages.py`: retired Pages rollback helpers
 - `dist/`: generated output, ignored by Git; never edit by hand
 
 ## Globe
@@ -201,86 +199,60 @@ adapter is **MIT**. Licenses, source hashes, Capy provenance, and modification
 notices are shipped in `public/vendor/DITHER-NOTICES.txt` and adjacent files.
 No Capy service, tracking, app code, product assets, or Lucumr code is copied.
 
-## Automatic private deployment (Cloudflare Pages)
+## Automatic private deployment (one VM)
 
-Push a tested commit to `main` in `v36372/personal-site`. Cloudflare's native
-GitHub integration builds and tests it with `bash ops/pages-build.sh`, then
-serves only `dist/` at https://tinnguyen.pages.dev/. No exe.dev VM serves the
-new website, and no self-hosted runner or GitHub deploy secret is needed.
+Push a tested commit to `main` in `v36372/personal-site`. The website VM’s
+`tinnguyen-update.timer` polls that branch approximately every minute. It fetches
+only the pinned public repository (no GitHub credential), verifies private VM
+visibility, runs `make test`, then `make build` to discard the local draft preview.
+Only a successful reviewed-content build is atomically installed in
+`/srv/tinnguyen/releases/`; nginx serves `/srv/tinnguyen/current`. Failed checks
+leave the previous release and deployed commit unchanged.
 
-Configuration:
+- No Actions runner on the website/BB VM. PRs/forks are never fetched there.
+- GitHub Actions uses disposable hosted runners for checks; no VM secrets.
+- The updater is a systemd timer, not a public webhook/server.
+- A file lock prevents concurrent updates. Logs: `journalctl -u tinnguyen-update`.
+- `personal-site-status.int.exe.xyz` is a vaulted, read-only integration on the
+  website VM. Its 1-year signing key permits only `share show`, not shell,
+  management or sharing changes. Rotate before expiry (2027-10-03).
+- Canonical/RSS/sitemap URLs default to `https://tinnguyen.exe.xyz`.
+- The larger About globe, dither bands, and finished UI are unchanged.
+- nginx handles `/archive` and `/archive/` → `/` redirects, relative directory
+  redirects behind HTTPS, gzip, noindex, and immutable vendor caching.
+  Ordinary assets revalidate to avoid mixing old JS/CSS with new HTML.
 
-- Production branch: `main`; production auto-deployment enabled.
-- Build command: `bash ops/pages-build.sh`; output directory: `dist/`.
-- Build image: v3; `PYTHON_VERSION=3.12`, `NODE_VERSION=22.20.0`,
-  `SKIP_DEPENDENCY_INSTALL=true`. Disable Pages' automatic `pip install .`: this
-  is a scripts-only uv project, not an installable package. The build command
-  installs pinned tooling and uses `uv.lock` itself.
-- Run tests against a local draft preview, then regenerate with `make build`.
-  The deployed site includes only published posts and reviewed bookmarks.
-  Drafts (including the layout specimen) remain in source/local preview only.
-  This content build mode does NOT disable Access or publish the website.
-- Branch and PR preview deployments: disabled. The Access wildcard still
-  protects every generated deployment URL, including production hashes.
-- Access application: `1add1fd3-ef6b-4897-ac60-390c5b60440b`, owner-only Google
-  login, 24-hour sessions, main AND wildcard Pages hosts. Never add bypasses.
-- `public/_redirects` permanently redirects the removed `/archive` and
-  `/archive/` URLs to `/`. No archive is generated or listed in the sitemap;
-  the writing page lists all published entries without a five-post cap.
-- `public/_headers` preserves the nginx CSP/security headers. Version-pinned
-  vendor assets get a one-year browser cache; Pages handles edge caching,
-  compression, HTTPS, and conditional requests for the remaining files.
-- `.github/workflows/deploy.yml` now runs **checks only**, on GitHub-hosted
-  runners. Pages independently runs all checks before publishing. PR code
-  never executes on the old self-hosted runner.
-
-From the BB VM, the attached Cloudflare integration supplies authentication
-without exposing the API token:
+Manual deployment from BB uses the existing owner exe integration:
 
 ```sh
-make test
-git push origin main                   # native Pages auto-deployment
-python3 scripts/deploy_pages.py --check # verify owner-only protection
-make deploy                            # rebuild committed GitHub main
-```
-
-`make deploy` does **not** upload uncommitted local changes. Commit and push
-first. Its privacy guard checks the Access configuration and actual anonymous
-requests to both the main and wildcard hosts. From another machine, set
-`CLOUDFLARE_API_URL=https://api.cloudflare.com/client/v4`, a scoped
-`CLOUDFLARE_API_TOKEN`, and `CLOUDFLARE_ACCESS_EMAIL` to the owner's login email.
-Keep credentials outside the repository.
-
-Canonical, RSS, and sitemap URLs default to `https://tinnguyen.pages.dev`.
-Override `SITE_URL` when building for a future custom domain. The old
-`*.exe.xyz` hostname belongs to exe.dev and cannot be reassigned as a Pages
-custom domain without its DNS owner. No unrelated DNS records were changed.
-
-Inspect builds and roll back in the Cloudflare Pages dashboard:
-
-https://dash.cloudflare.com/700a6c6ad6178d92f1abcf67630f3a95/pages/view/tinnguyen
-
-GitHub checks: https://github.com/v36372/personal-site/actions
-
-## Legacy VM rollback copy
-
-The private nginx copy at https://tinnguyen.exe.xyz/ is retained, not updated
-automatically. The `tinnguyen-ci` runner service has been stopped and its VM
-deploy integration detached. Neither VM has been deleted; request removal
-when the rollback copy is no longer needed.
-
-The old scripts remain available for an explicit VM rollback:
-
-```sh
-SITE_URL=https://tinnguyen.exe.xyz make deploy-vm
-SITE_URL=https://tinnguyen.exe.xyz make setup-vm
-# Or, after a preview build, use owner SSH:
+make deploy        # tests, reviewed build, private guard, atomic upload
+make setup-vm      # also install nginx and verified tools on exeslim
+python3 scripts/deploy.py --check
+# Or use owner SSH after make build:
 python3 scripts/deploy.py --ssh
 ```
 
-These commands preserve the legacy VM's private access. Source, secrets, and
-runner state are never uploaded; nginx serves only `/srv/tinnguyen/current`
-on port 8000. Existing releases are retained for atomic symlink rollback.
+Source, credentials and updater state never enter the web root. Retained
+releases support atomic symlink rollback. Install the public service files
+`ops/vm-update.sh` and `ops/tinnguyen-update.{service,timer}` on the VM; the stable
+updater is `/usr/local/libexec/tinnguyen-update`. Its git checkout lives at
+`/home/exedev/personal-site`, outside the served tree.
+
+## Retired hosting
+
+`tinnguyen-ci` was the dedicated self-hosted GitHub runner for the first VM
+pipeline. It is deleted; its deploy integration and signing key were removed.
+Do not recreate it. GitHub’s old offline runner record may remain because this
+integration cannot manage runner registrations; it has no running VM and can
+be removed in Settings → Actions → Runners. No new runner token is needed.
+
+Cloudflare auto-deployment is disabled, including branch/PR previews. The old
+private project remains a rollback snapshot, not the primary site. Keep Access
+app `1add1fd3-ef6b-4897-ac60-390c5b60440b` protecting `tinnguyen.pages.dev` AND
+`*.tinnguyen.pages.dev`. `scripts/deploy_pages.py --check` verifies it.
+`make deploy-pages` is an explicit rollback helper only. Before restoring
+Pages, review its native deploy settings and set its `SITE_URL` to
+`https://tinnguyen.pages.dev`, rather than reactivating two auto-deployments.
 
 **The repository is public, even though the website is private.** Do not commit
 confidential drafts, private bookmarks, tokens, or personal exports. A draft
