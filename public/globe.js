@@ -101,7 +101,7 @@ try {
     ...globeAppearance(),
     diffuse: 1.4,
     mapSamples: 3000,
-    // Keep the city dot legible at one-line icon sizes, without a large label.
+    // Keep the city dot legible at compact header sizes, without a large label.
     markers: [{ location: HOME_LOCATION, size: Math.min(0.25, 5 / size) }],
   });
   if (gl.isContextLost()) throw new Error('WebGL context lost');

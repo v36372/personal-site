@@ -39,7 +39,8 @@
   /srv/tinnguyen/current on nginx port 8000 through its private HTTPS proxy.
 - Confirmed location: Ho Chi Minh City, Vietnam (10.8231, 106.6297). The
   globe uses self-hosted COBE 2.0.1. Keep it ONLY in the shared header, beside
-  the site name, exactly one text line high (1lh). No content-area globe or
+  the name/tagline block, with its square matching their combined height
+  (about 56px desktop / 52px mobile). No content-area globe or
   large pin label. See README.md for CSP, motion, and fallback details.
 - Capy-style animated dither art is ONLY in top/bottom bands: each 180px desktop /
   120px mobile, with a long eased fade toward the body, never behind reading.

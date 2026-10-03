@@ -101,11 +101,16 @@ class SiteTests(unittest.TestCase):
             main = text.split('<main ', 1)[1].split('</main>', 1)[0]
             self.assertEqual(text.count('id="globe"'), 1)
             self.assertIn('id="globe"', header)
+            copy = header.split('<div class="identity-copy">', 1)[1].split('</div>', 1)[0]
+            self.assertIn('class="site-name"', copy)
+            self.assertIn('class="site-tagline"', copy)
+            self.assertNotIn('id="globe"', copy)
             self.assertNotIn('id="globe"', main)
             self.assertNotIn('globe-pin', text)
             self.assertIn('src="/globe.js"', text)
         css = (ASSETS / 'site.css').read_text()
-        self.assertIn('width: 1lh; height: 1lh;', css)
+        self.assertIn('width: var(--globe-size); height: var(--globe-size);', css)
+        self.assertIn('--globe-size: calc(var(--name-size) * var(--name-leading) + var(--text-gap) + var(--tagline-size) * var(--tagline-leading));', css)
 
     def test_dither_art_frames_both_edges_without_covering_reading(self):
         for path in OUTPUT.rglob('*.html'):

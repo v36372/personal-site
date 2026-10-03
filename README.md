@@ -4,7 +4,7 @@ A compact personal notebook inspired by [ludwigabap.com](https://ludwigabap.com/
 warm monospace UI, writing and bookmarks tabs, dense saved-link lists, search,
 filters, and timeline browsing. Readable Markdown articles, archives, topics,
 and RSS remain from the earlier lucumr-inspired blog. The small COBE globe marks
-Ho Chi Minh City in the header only, as a one-text-line-sized icon. Warm/light/dark themes are
+Ho Chi Minh City in the header only, sized to the name and tagline together. Warm/light/dark themes are
 saved locally. Animated Capy-style dither bands frame the top and bottom of
 every page, never behind reading content. There are no third-party fonts,
 analytics, or runtime requests.
@@ -144,8 +144,10 @@ CDN requests. `public/globe-location.js` contains the city-level coordinates
 `public/globe.js` owns the render loop via COBE 2's `globe.update()`. Bounded
 rotation keeps the city visible. Pause/play, reduced-motion preferences,
 offscreen/hidden-tab suspension, and no-JavaScript/WebGL fallbacks are supported.
-The globe appears only beside the site name in the shared header, on every
-page. Its square is exactly one name-line high (CSS `1lh`), with no large map,
+The globe appears only beside the name and tagline in the shared header, on
+every page. Its square matches their combined height (about **56px desktop /
+52px mobile**), derived from their font sizes, line heights, and text gap.
+On very narrow screens the header actions move below to avoid overlap. No large map,
 caption, or floating pin label in the content. Click the icon to pause/play;
 its tooltip and accessible name retain the city. A small SVG location icon is
 the no-JavaScript/WebGL fallback. Reading still works without JavaScript.
