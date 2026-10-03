@@ -1,7 +1,8 @@
 # Tin Nguyen — personal website
 
-A small, dependency-free personal-site starter. Edit the files in `public/`;
-no framework or build step is required.
+A small, build-free personal site with a self-hosted COBE globe. Edit the files
+in `public/`; no framework, package install, or build step is required. Local
+tests use Python 3 and Node.js 22+; the deployment VM needs only nginx.
 
 ## Project
 
@@ -27,7 +28,29 @@ make test                 # site checks + script syntax checks
 
 Start with `public/index.html` for content and `public/site.css` for styling.
 The homepage is intentionally a placeholder: no invented bio, projects, or
-contact details.
+contact details. The location is Ho Chi Minh City, Vietnam, as supplied by Tin.
+
+## Globe
+
+- Library: [COBE](https://github.com/shuding/cobe), pinned to **2.0.1**.
+- The official npm ES module and MIT license are vendored in `public/vendor/`.
+  There are no runtime CDN requests or npm dependencies to install.
+- Coordinates: **10.8231° N, 106.6297° E** (city-level, not a precise address).
+- `public/globe-location.js` holds the coordinates, starting orientation,
+  and label projection; `public/globe.js` initializes and animates COBE.
+- The globe gently rotates around Vietnam without hiding the marker. It
+  respects reduced-motion preferences, has a pause/play button, and suspends
+  rendering when offscreen or the tab is hidden.
+- The location remains readable without JavaScript or WebGL.
+- COBE 2 uses `globe.update()`; our code owns the render loop, not an
+  `onRender` callback from older examples.
+
+The nginx CSP permits COBE's embedded PNG via `img-src 'self' data:` and
+hash-allows its empty and `:root{}` style blocks (including text replacement).
+Everything else remains same-origin; no `unsafe-inline` or `unsafe-eval` is
+enabled. Bindable marker
+IDs are intentionally omitted to avoid dynamic inline stylesheet rules and
+CSS-anchor browser dependencies. Recheck this policy if upgrading COBE.
 
 ## Deploy
 

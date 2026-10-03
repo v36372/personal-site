@@ -1,4 +1,6 @@
 """Dependency-free checks for the static site and deployment configuration."""
+import base64
+import hashlib
 from html.parser import HTMLParser
 from pathlib import Path
 import unittest
@@ -64,6 +66,31 @@ class SiteTests(unittest.TestCase):
         for path in PUBLIC.rglob("*"):
             self.assertFalse(path.is_symlink())
             self.assertFalse(path.name.startswith("."))
+
+    def test_globe_is_progressive_and_location_is_accessible(self):
+        page = Page((PUBLIC / "index.html").read_text())
+        self.assertIn(("script", {"type": "module", "src": "/globe.js"}), page.tags)
+        self.assertTrue(any(tag == "figure" and attrs.get("aria-labelledby") == "location-title"
+                            for tag, attrs in page.tags))
+        self.assertTrue(any(tag == "canvas" and attrs.get("id") == "globe" for tag, attrs in page.tags))
+        self.assertIn("Ho Chi Minh City", (PUBLIC / "index.html").read_text())
+        self.assertIn("Vietnam", (PUBLIC / "index.html").read_text())
+        self.assertIn("prefers-reduced-motion", (PUBLIC / "globe.js").read_text())
+
+    def test_cobe_is_pinned_and_license_is_included(self):
+        vendor = PUBLIC / "vendor/cobe-2.0.1.js"
+        self.assertEqual(hashlib.sha256(vendor.read_bytes()).hexdigest(),
+                         "b4706c2a8772c5983f0872e02bbb707e551e093b32ad7c01d61dd661765097ee")
+        self.assertIn("Copyright (c) 2021 Shu Ding", (PUBLIC / "vendor/cobe-LICENSE.txt").read_text())
+
+    def test_csp_allows_cobe_without_unsafe_inline_or_eval(self):
+        config = (ROOT / "ops/nginx.conf").read_text()
+        for style in (b"", b":root{}"):
+            style_hash = base64.b64encode(hashlib.sha256(style).digest()).decode()
+            self.assertIn("'sha256-" + style_hash + "'", config)
+        self.assertIn("img-src 'self' data:", config)
+        self.assertNotIn("'unsafe-inline'", config)
+        self.assertNotIn("'unsafe-eval'", config)
 
     def test_nginx_only_exposes_public_release(self):
         config = (ROOT / "ops/nginx.conf").read_text()

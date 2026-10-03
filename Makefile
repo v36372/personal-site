@@ -6,6 +6,8 @@ dev:
 
 test:
 	python3 -m unittest discover -s tests -v
+	node --test tests/globe.test.mjs
+	node --check public/globe.js
 	python3 -m py_compile scripts/deploy.py
 	bash -n ops/bootstrap.sh
 
