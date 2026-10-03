@@ -36,7 +36,7 @@ button { cursor: pointer; }
 .skip-link:focus { top: 12px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .site-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; }
-.identity { --name-size: 24px; --name-leading: 1.2; --tagline-size: 11px; --tagline-leading: 1.7; --text-gap: 8px; --globe-size: calc(var(--name-size) * var(--name-leading) + var(--text-gap) + var(--tagline-size) * var(--tagline-leading)); display: flex; align-items: center; gap: 10px; }
+.identity { --name-size: 24px; --name-leading: 1.2; --tagline-size: 11px; --tagline-leading: 1.7; --text-gap: 8px; display: flex; align-items: center; gap: 10px; }
 .identity-copy { display: flex; flex-direction: column; font-size: var(--name-size); line-height: var(--name-leading); }
 .site-name { color: var(--ink); font-size: inherit; line-height: inherit; letter-spacing: -1px; text-decoration: none; font-weight: 600; white-space: nowrap; }
 .name-period { color: var(--accent); }
@@ -82,13 +82,13 @@ h1 { margin: 0; font-size: 28px; letter-spacing: -.04em; overflow-wrap: break-wo
 .draft-label { display: inline-block; margin: 7px 0 0; color: var(--accent); font-size: 9px; text-transform: uppercase; letter-spacing: .04em; }
 .page-heading { margin-bottom: 30px; }
 .page-heading p:not(.eyebrow) { margin: 14px 0 0; color: var(--muted); font-size: 12px; }
-.archive-year { margin-bottom: 32px; }
-.archive-year > h2 { font-size: 20px; margin: 0 0 4px; }
-.topic-section { margin-top: 32px; }
-.topic-section h2 { font-size: 16px; }
-.topic-links { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; }
-.about-layout { max-width: 720px; }
+.about-layout { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 44px; align-items: center; }
+.about-layout .prose > :last-child { margin-bottom: 0; }
 .about-lede { font-size: 24px; }
+.about-location { margin: 0; text-align: center; }
+.location-caption { margin-top: 16px; color: var(--muted); font-size: 11px; }
+.about-links { max-width: 720px; margin-top: 32px; }
+.about-links h2 { margin-top: 0; }
 .article { max-width: 720px; margin: 0 auto; }
 .back-link { display: inline-block; color: var(--muted); font-size: 11px; text-decoration: none; }
 .back-link:hover { text-decoration: underline; }
@@ -120,9 +120,10 @@ h1 { margin: 0; font-size: 28px; letter-spacing: -.04em; overflow-wrap: break-wo
 .site-footer a { color: var(--muted); text-decoration: none; }
 .site-footer a:hover { text-decoration: underline; }
 .footer-separator { padding: 0 8px; }
-.header-location { display: block; position: relative; flex-shrink: 0; width: var(--globe-size); height: var(--globe-size); color: var(--accent); }
-.header-globe { position: absolute; inset: 0; display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; color: inherit; border-radius: 50%; }
+.about-globe { --globe-size: 240px; display: block; position: relative; width: var(--globe-size); height: var(--globe-size); margin: 0 auto; color: var(--accent); }
+.globe-control { position: absolute; inset: 0; display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; color: inherit; border-radius: 50%; }
 .globe-fallback { display: block; width: 100%; height: 100%; }
+.globe-fallback :not(.location-dot) { vector-effect: non-scaling-stroke; stroke-width: 1.5px; }
 .globe-fallback .location-dot { fill: var(--pin); stroke: none; }
 .globe-stage { display: block; width: 100%; height: 100%; }
 .globe-stage canvas { display: block; width: 100%; height: 100%; opacity: 0; transition: opacity .3s ease; }
@@ -178,6 +179,8 @@ h1 { margin: 0; font-size: 28px; letter-spacing: -.04em; overflow-wrap: break-wo
   .home-columns { grid-template-columns: 1fr; gap: 24px; }
   h1 { font-size: 24px; }
   .saved-section { margin-top: 6px; }
+  .about-layout { grid-template-columns: 1fr; gap: 24px; }
+  .about-globe { --globe-size: 200px; }
   .prose { font-size: 17px; }
   .prose pre { padding: 16px; }
   .article-navigation { flex-direction: column; }

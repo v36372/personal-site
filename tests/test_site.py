@@ -105,14 +105,14 @@ class SiteTests(unittest.TestCase):
         self.assertEqual([item.findtext('title') for item in items], [post.title for post in self.published[:20]])
         sitemap = ET.parse(OUTPUT / 'sitemap.xml')
         urls = [node.text for node in sitemap.findall('.//{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
-        expected = ['/', '/archive/', '/about/', '/bookmarks/'] + [post.url for post in self.published]
+        expected = ['/', '/about/', '/bookmarks/'] + [post.url for post in self.published]
         expected += ['/tags/' + tag_slug(tag) + '/' for tag in sorted({tag for post in self.published for tag in post.tags})]
         self.assertEqual(urls, [SITE_URL + path for path in expected])
         for post in self.drafts:
             self.assertNotIn(SITE_URL + post.url, urls)
 
     def test_globe_is_progressive_and_location_is_accessible(self):
-        text = (OUTPUT / 'index.html').read_text()
+        text = (OUTPUT / 'about/index.html').read_text()
         page = Page(text)
         self.assertIn(('script', {'type': 'module', 'src': '/globe.js'}), page.tags)
         self.assertTrue(any(tag == 'button' and attrs.get('id') == 'globe-motion'
@@ -122,23 +122,33 @@ class SiteTests(unittest.TestCase):
         self.assertIn('Vietnam', text)
         self.assertIn('prefers-reduced-motion', (ASSETS / 'globe.js').read_text())
 
-    def test_globe_is_only_in_the_header_on_every_page(self):
+    def test_globe_is_large_and_loaded_only_on_about(self):
         for path in OUTPUT.rglob('*.html'):
             text = path.read_text()
             header = text.split('<header class="site-header">', 1)[1].split('</header>', 1)[0]
             main = text.split('<main ', 1)[1].split('</main>', 1)[0]
-            self.assertEqual(text.count('id="globe"'), 1)
-            self.assertIn('id="globe"', header)
-            copy = header.split('<div class="identity-copy">', 1)[1].split('</div>', 1)[0]
-            self.assertIn('class="site-name"', copy)
-            self.assertIn('class="site-tagline"', copy)
-            self.assertNotIn('id="globe"', copy)
-            self.assertNotIn('id="globe"', main)
-            self.assertNotIn('globe-pin', text)
-            self.assertIn('src="/globe.js"', text)
+            self.assertNotIn('id="globe"', header)
+            self.assertIn('class="site-name"', header)
+            self.assertIn('class="site-tagline"', header)
+            if path == OUTPUT / 'about/index.html':
+                self.assertEqual(text.count('id="globe"'), 1)
+                self.assertIn('id="globe"', main)
+                self.assertIn('src="/globe.js"', text)
+                self.assertIn('class="about-globe"', main)
+            else:
+                self.assertNotIn('id="globe"', text)
+                self.assertNotIn('src="/globe.js"', text)
         css = (ASSETS / 'site.css').read_text()
         self.assertIn('width: var(--globe-size); height: var(--globe-size);', css)
-        self.assertIn('--globe-size: calc(var(--name-size) * var(--name-leading) + var(--text-gap) + var(--tagline-size) * var(--tagline-leading));', css)
+        self.assertIn('--globe-size: 240px;', css)
+        self.assertIn('--globe-size: 200px;', css)
+
+    def test_archive_is_removed_with_permanent_home_redirects(self):
+        self.assertFalse((OUTPUT / 'archive').exists())
+        for path in OUTPUT.rglob('*.html'):
+            self.assertNotIn('href="/archive', path.read_text())
+        self.assertNotIn('/archive/', (OUTPUT / 'sitemap.xml').read_text())
+        self.assertEqual((OUTPUT / '_redirects').read_text(), '/archive / 301\n/archive/ / 301\n')
 
     def test_dither_art_frames_both_edges_without_covering_reading(self):
         for path in OUTPUT.rglob('*.html'):

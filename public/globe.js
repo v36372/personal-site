@@ -105,9 +105,9 @@ try {
     context,
     ...globeAppearance(),
     diffuse: 1.4,
-    mapSamples: 3000,
-    // Keep the city dot legible at compact header sizes, without a large label.
-    markers: [{ location: HOME_LOCATION, size: Math.min(0.25, 5 / size) }],
+    mapSamples: 16000,
+    // A small city marker stays legible on the larger About globe.
+    markers: [{ location: HOME_LOCATION, size: Math.min(0.05, 7 / size) }],
   });
   if (gl.isContextLost()) throw new Error('WebGL context lost');
   fallback.setAttribute('hidden', '');

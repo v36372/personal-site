@@ -41,14 +41,16 @@
 - Pages serves generated dist/ only; public/_headers preserves the CSP.
   Do not expose the source root or admin/dev servers. The legacy VM serves only
   /srv/tinnguyen/current on nginx port 8000 through its private HTTPS proxy.
+- No Archive page, navigation, or sitemap entry. /archive and /archive/
+  redirect permanently to /. The writing index lists ALL published posts.
 - Confirmed location: Ho Chi Minh City, Vietnam (10.8231, 106.6297). The
-  globe uses self-hosted COBE 2.0.1. Keep it ONLY in the shared header, beside
-  the name/tagline block, with its square matching their combined height
-  (about 56px desktop / 52px mobile). No content-area globe or
-  large pin label. See README.md for CSP, motion, and fallback details.
+  self-hosted COBE 2.0.1 globe lives ONLY in the About content: 240px desktop,
+  200px mobile, alongside the introduction / stacked on narrow screens.
+  Never load COBE or globe.js on other pages, or put a globe in the header.
+  Keep city marker, accessible pause/play, reduced motion, and fallbacks.
 - Capy-style animated dither art is ONLY in top/bottom bands: each 180px desktop /
   120px mobile, with a long eased fade toward the body, never behind reading.
-  No visible art controls. The globe button pauses/plays ALL animations, with
+  No visible art controls. The About globe pauses/plays ALL animations, with
   session-local preference. Preserve reduced-motion/static fallback, theme matching,
   lazy offscreen initialization, and bounded 15fps rendering at 0.35x speed.
   Shader sources are pinned from Aura; retain MIT/Apache notices when editing.

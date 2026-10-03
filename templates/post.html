@@ -14,6 +14,6 @@
 <nav class="article-navigation" aria-label="More writing">
   {% if older %}<a href="{{ older.url }}"><span>← Older entry</span>{{ older.title }}</a>{% endif %}
   {% if newer %}<a href="{{ newer.url }}"><span>Newer entry →</span>{{ newer.title }}</a>{% endif %}
-  {% if not older and not newer %}<a href="/archive/">Browse the archive →</a>{% endif %}
+  {% if not older and not newer %}<a href="/">All writing →</a>{% endif %}
 </nav>
 {% endblock %}

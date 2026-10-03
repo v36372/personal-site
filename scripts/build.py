@@ -176,9 +176,6 @@ def build(root=ROOT, output=None, include_drafts=False):
             target.write_text(env.get_template(template).render(context | {"path": path} | extra), encoding="utf-8")
 
         render("home.html", "/", title="Writing", active="writing")
-        groups = [(year, [post for post in selected if post.date.year == year])
-                  for year in sorted({post.date.year for post in selected}, reverse=True)]
-        render("archive.html", "/archive/", title="Archive", active="archive", groups=groups)
         render("about.html", "/about/", title="About", active="about")
         render("bookmarks.html", "/bookmarks/", title="Bookmarks", active="bookmarks",
                has_bookmarks=True, bookmark_groups=bookmark_groups,
@@ -197,7 +194,7 @@ def build(root=ROOT, output=None, include_drafts=False):
         ET.register_namespace("", SITEMAP)
         sitemap = ET.Element(f"{{{SITEMAP}}}urlset")
         published_tags = sorted({tag for post in published for tag in post.tags})
-        urls = ["/", "/archive/", "/about/", "/bookmarks/"] + [post.url for post in published]
+        urls = ["/", "/about/", "/bookmarks/"] + [post.url for post in published]
         urls += [f"/tags/{tag_slug(tag)}/" for tag in published_tags]
         for path in urls:
             ET.SubElement(ET.SubElement(sitemap, f"{{{SITEMAP}}}url"), f"{{{SITEMAP}}}loc").text = SITE_URL + path

@@ -2,10 +2,10 @@
 
 A compact personal notebook inspired by [ludwigabap.com](https://ludwigabap.com/):
 warm monospace UI, writing and bookmarks tabs, dense saved-link lists, search,
-filters, and timeline browsing. Readable Markdown articles, archives, topics,
-and RSS remain from the earlier lucumr-inspired blog. The small COBE globe marks
-Ho Chi Minh City in the header only, sized to the name and tagline together. Warm/light/dark themes are
-saved locally. Animated Capy-style dither bands frame the top and bottom of
+filters, and timeline browsing. Readable Markdown articles, topics, and RSS
+remain from the earlier lucumr-inspired blog. Writing is listed on the home page;
+there is no separate Archive page. A larger COBE globe marks Ho Chi Minh City
+on About only. Warm/light/dark themes are saved locally. Animated Capy-style dither bands frame the top and bottom of
 every page, never behind reading content. There are no third-party fonts,
 analytics, or runtime requests.
 
@@ -82,7 +82,7 @@ quotes, fenced code blocks, and tables are supported. Raw HTML is escaped.
 - Delete or replace `content/posts/2026-10-03-a-little-corner.md` before publishing
   real writing. It is only a specimen of the article layout.
 
-Navigation, year groups, topic pages, reading times, and feeds are generated
+Navigation, topic pages, reading times, and feeds are generated
 from the posts. No manual index editing is needed.
 
 ## Bookmarks
@@ -146,14 +146,14 @@ CDN requests. `public/globe-location.js` contains the city-level coordinates
 `public/globe.js` owns the render loop via COBE 2's `globe.update()`. Bounded
 rotation keeps the city visible. Pause/play, reduced-motion preferences,
 offscreen/hidden-tab suspension, and no-JavaScript/WebGL fallbacks are supported.
-The globe appears only beside the name and tagline in the shared header, on
-every page. Its square matches their combined height (about **56px desktop /
-52px mobile**), derived from their font sizes, line heights, and text gap.
-On very narrow screens the header actions move below to avoid overlap. No large map,
-caption, or floating pin label in the content. Click or keyboard-activate the
-icon to pause/play both the globe and dither bands; the choice is remembered
-within the tab. Its tooltip and accessible name retain the city. A small SVG location icon is
-the no-JavaScript/WebGL fallback. Reading still works without JavaScript.
+The globe appears ONLY in the About content, beside the introduction on desktop
+and stacked below it on mobile. Its square is **240px desktop / 200px mobile**.
+A small caption names the city. The shared header has no globe; other pages do
+not load its script or COBE, keeping GPU work and downloads off the writing page.
+The larger renderer uses 16,000 map samples, bounded 30fps animation, and DPR ≤2.
+Click or keyboard-activate the globe to pause/play it and both dither bands;
+the choice is remembered throughout the tab. The tooltip/accessible name retain
+the city. An SVG is the no-JavaScript/WebGL fallback. Reading still works without JS.
 
 The CSP permits the embedded PNG with `img-src 'self' data:` and hash-allows
 COBE's empty and `:root{}` style blocks. No `unsafe-inline` or `unsafe-eval` is
@@ -185,7 +185,7 @@ Files and tuning:
 
 - `public/header-art.js`: shared header/footer renderer and lifecycle; at most
   15 fps per visible band on one animation clock. No visible banner buttons;
-  the existing globe control pauses/plays all animations via motionchange.
+  the About globe pauses/plays all animations via motionchange.
   Offscreen bands initialize lazily; hidden tabs/offscreen bands do not animate.
   Reduced motion renders static art.
 - `public/dither-settings.js`: Capy's noise/Bayer settings, 0.35× clock speed,
@@ -224,6 +224,9 @@ Configuration:
   protects every generated deployment URL, including production hashes.
 - Access application: `1add1fd3-ef6b-4897-ac60-390c5b60440b`, owner-only Google
   login, 24-hour sessions, main AND wildcard Pages hosts. Never add bypasses.
+- `public/_redirects` permanently redirects the removed `/archive` and
+  `/archive/` URLs to `/`. No archive is generated or listed in the sitemap;
+  the writing page lists all published entries without a five-post cap.
 - `public/_headers` preserves the nginx CSP/security headers. Version-pinned
   vendor assets get a one-year browser cache; Pages handles edge caching,
   compression, HTTPS, and conditional requests for the remaining files.

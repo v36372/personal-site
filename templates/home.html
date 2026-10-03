@@ -11,9 +11,9 @@
 <div class="home-columns">
   <div>
     <section class="writing-section" aria-labelledby="writing-title">
-      <div class="section-heading"><h2 id="writing-title">Recent writing</h2><a href="/archive/">All writing →</a></div>
+      <div class="section-heading"><h2 id="writing-title">Writing</h2></div>
       {% if published %}
-        {% with entries=published[:5] %}{% include "_post-list.html" %}{% endwith %}
+        {% with entries=published %}{% include "_post-list.html" %}{% endwith %}
       {% else %}
         <div class="empty-state"><p>No entries.</p></div>
       {% endif %}

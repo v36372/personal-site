@@ -2,5 +2,5 @@
 {% block content %}
 <header class="page-heading"><p class="eyebrow">Filed under</p><h1>{{ tag }}</h1><p>{{ entries|length }} {{ 'entry' if entries|length == 1 else 'entries' }}{% if preview and not published_entries %} · private drafts{% endif %}</p></header>
 {% include "_post-list.html" %}
-<a class="back-link" href="/archive/">← Back to the archive</a>
+<a class="back-link" href="/">← All writing</a>
 {% endblock %}

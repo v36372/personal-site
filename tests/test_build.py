@@ -65,6 +65,17 @@ class BuildTests(unittest.TestCase):
         self.assertIn('/2023/01/01/older-entry/', newer)
         self.assertIn('Older entry', newer)
 
+    def test_writing_page_lists_all_entries_after_archive_removal(self):
+        for index in range(7):
+            self.add_post(str(index), slug=f'entry-{index}', published=f'2024-01-0{index + 1}')
+        posts = build(self.root)
+        homepage = (self.output / 'index.html').read_text()
+        for post in posts:
+            self.assertIn(f'href="{post.url}"', homepage)
+        self.assertEqual([homepage.index(f'href="{post.url}"') for post in posts],
+                         sorted(homepage.index(f'href="{post.url}"') for post in posts))
+        self.assertFalse((self.output / 'archive').exists())
+
     def test_invalid_metadata_keeps_last_successful_build(self):
         path = self.add_post('published')
         build(self.root)

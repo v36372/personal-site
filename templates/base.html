@@ -12,7 +12,7 @@
   <script src="/theme.js"></script>
   <link rel="stylesheet" href="/site.css">
   <link rel="alternate" type="application/rss+xml" title="Tin Nguyen's writing" href="/feed.xml">
-  <script type="module" src="/globe.js"></script>
+  {% if active == 'about' %}<script type="module" src="/globe.js"></script>{% endif %}
   <script type="module" src="/header-art.js"></script>
   {% if has_bookmarks %}<script type="module" src="/bookmarks.js"></script>{% endif %}
 </head>
@@ -26,7 +26,6 @@
           <a class="site-name" href="/">Tin Nguyen<span class="name-period">.</span></a>
           <span class="site-tagline">A personal notebook</span>
         </div>
-        {% include "_globe.html" %}
       </div>
       <div class="header-actions">
         <button class="theme-control" id="theme-control" type="button" hidden>Theme: Warm</button>
@@ -35,7 +34,6 @@
     <nav class="site-nav" aria-label="Main navigation">
       <a href="/"{% if active == 'writing' %} aria-current="page"{% endif %}>Writing</a>
       <a href="/bookmarks/"{% if active == 'bookmarks' %} aria-current="page"{% endif %}>Bookmarks <span class="nav-count" aria-hidden="true">{{ bookmarks|length }}</span></a>
-      <a href="/archive/"{% if active == 'archive' %} aria-current="page"{% endif %}>Archive</a>
       <a href="/about/"{% if active == 'about' %} aria-current="page"{% endif %}>About</a>
       <a class="feed-link" href="/feed.xml">RSS <span aria-hidden="true">↗</span></a>
     </nav>
@@ -44,7 +42,7 @@
     </main>
     <footer class="site-footer">
       <span>© {{ year }} Tin Nguyen</span>
-      <span><a href="/archive/">All writing</a><span class="footer-separator" aria-hidden="true"> / </span><a href="/feed.xml">RSS feed</a></span>
+      <span><a href="/">All writing</a><span class="footer-separator" aria-hidden="true"> / </span><a href="/feed.xml">RSS feed</a></span>
     </footer>
   </div>
   {% with art_position = 'footer' %}{% include "_header-art.html" %}{% endwith %}
