@@ -206,7 +206,10 @@ Configuration:
 
 - Production branch: `main`; production auto-deployment enabled.
 - Build command: `bash ops/pages-build.sh`; output directory: `dist/`.
-- Build image: v3; `PYTHON_VERSION=3.12`, `NODE_VERSION=22.20.0`.
+- Build image: v3; `PYTHON_VERSION=3.12`, `NODE_VERSION=22.20.0`,
+  `SKIP_DEPENDENCY_INSTALL=true`. Disable Pages' automatic `pip install .`: this
+  is a scripts-only uv project, not an installable package. The build command
+  installs pinned tooling and uses `uv.lock` itself.
 - Drafts are included for private review; feeds/sitemaps still exclude drafts.
 - Branch and PR preview deployments: disabled. The Access wildcard still
   protects every generated deployment URL, including production hashes.
