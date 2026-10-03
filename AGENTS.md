@@ -4,16 +4,20 @@
 - Repository: v36372/personal-site (public). Do not commit private exports,
   confidential drafts/bookmarks, credentials, or runner state. Website-private
   visibility does NOT hide the GitHub source.
-- Deployment VM: tinnguyen.exe.xyz, image ghcr.io/ryanlewis/exeslim:latest.
-- Auto deployment: .github/workflows/deploy.yml, trusted main pushes only,
-  on repo-scoped runner tinnguyen-ci (label personal-site-deploy). Never run
-  untrusted pull-request code on this self-hosted machine.
-- CI uses the vault-backed personal-site-deploy integration, scoped to
-  ssh tinnguyen / share show; credential expires 2027-10-03. See README.md.
+- Hosting: private Cloudflare Pages at tinnguyen.pages.dev. Native GitHub
+  integration builds main with bash ops/pages-build.sh, output dist/.
+  Branch/PR previews are disabled. GitHub Actions runs checks on hosted runners.
+- Access app 1add1fd3-ef6b-4897-ac60-390c5b60440b protects BOTH
+  tinnguyen.pages.dev and *.tinnguyen.pages.dev with owner-only Google login.
+  Keep it enabled; all generated production deployment URLs must stay private.
+- Legacy tinnguyen.exe.xyz is a private rollback copy. The tinnguyen-ci runner
+  is stopped, not deleted. Never execute untrusted PR code on that VM.
 - This is an original Markdown blog: edit content/posts/ for writing, templates/
   for layouts, and public/ for assets. dist/ is generated; never edit it.
 - Run make dev for local auto-rebuilding previews, make test for checks, and
-  make deploy to upload a private preview. Python dependencies use uv.lock.
+  git push origin main for Pages auto-deployment. make deploy verifies Access
+  and rebuilds committed GitHub main, not local changes. See README.md.
+  Python dependencies use uv.lock.
 - Drafts default to true, are visibly labeled, and are excluded from RSS and
   sitemap. make build excludes drafts; make preview includes them.
 - Current design inspiration: ludwigabap.com (compact warm monospace UI and
@@ -30,15 +34,19 @@
 - Keep the website PRIVATE while Tin is editing. Do not enable public access
   or create share links unless Tin explicitly asks to publish/share it.
   Deployments must preserve the existing private visibility.
-- Only /srv/tinnguyen/current on nginx port 8000 is served through the HTTPS
-  proxy. Do not serve the source root or expose admin/dev servers publicly.
+- Pages serves generated dist/ only; public/_headers preserves the CSP.
+  Do not expose the source root or admin/dev servers. The legacy VM serves only
+  /srv/tinnguyen/current on nginx port 8000 through its private HTTPS proxy.
 - Confirmed location: Ho Chi Minh City, Vietnam (10.8231, 106.6297). The
   globe uses self-hosted COBE 2.0.1. Keep it ONLY in the shared header, beside
   the site name, exactly one text line high (1lh). No content-area globe or
   large pin label. See README.md for CSP, motion, and fallback details.
-- Capy-style animated dither art is ONLY a top-of-page strip: 150px desktop /
-  100px mobile, not a full-page/chat wallpaper. Preserve the pause control,
-  reduced-motion/static fallback, theme matching, and bounded 15fps rendering.
+- Capy-style animated dither art is ONLY in top/bottom bands: each 180px desktop /
+  120px mobile, with a long eased fade toward the body, never behind reading.
+  Preserve synced pause controls, reduced-motion/static fallback, theme matching,
+  lazy offscreen initialization, and bounded 15fps rendering at 0.35x speed.
   Shader sources are pinned from Aura; retain MIT/Apache notices when editing.
 - Do not invent personal biography, social links, projects, or contact details.
-- exeslim is a deployment target without a development toolchain. Develop here.
+- Develop here; no exe.dev VM is needed to build or serve the Pages deployment.
+  Account/project IDs are configuration, not secrets. API credentials are
+  vault-backed via cloudflare.int.exe.xyz; never commit or log tokens.

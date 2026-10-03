@@ -6,7 +6,7 @@ from pathlib import Path
 import unittest
 from urllib.parse import unquote, urljoin, urlparse
 import xml.etree.ElementTree as ET
-from scripts.build import load_posts, tag_slug
+from scripts.build import SITE_URL, load_posts, tag_slug
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / 'dist'
@@ -61,7 +61,7 @@ class SiteTests(unittest.TestCase):
 
     def test_homepage_has_correct_canonical_and_honest_empty_state(self):
         text = (OUTPUT / 'index.html').read_text()
-        self.assertIn(('link', {'rel': 'canonical', 'href': 'https://tinnguyen.exe.xyz/'}), Page(text).tags)
+        self.assertIn(('link', {'rel': 'canonical', 'href': SITE_URL + '/'}), Page(text).tags)
         if not self.published:
             self.assertIn('No published posts yet.', text)
         if self.drafts:
@@ -79,9 +79,9 @@ class SiteTests(unittest.TestCase):
         urls = [node.text for node in sitemap.findall('.//{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
         expected = ['/', '/archive/', '/about/', '/bookmarks/'] + [post.url for post in self.published]
         expected += ['/tags/' + tag_slug(tag) + '/' for tag in sorted({tag for post in self.published for tag in post.tags})]
-        self.assertEqual(urls, ['https://tinnguyen.exe.xyz' + path for path in expected])
+        self.assertEqual(urls, [SITE_URL + path for path in expected])
         for post in self.drafts:
-            self.assertNotIn('https://tinnguyen.exe.xyz' + post.url, urls)
+            self.assertNotIn(SITE_URL + post.url, urls)
 
     def test_globe_is_progressive_and_location_is_accessible(self):
         text = (OUTPUT / 'index.html').read_text()
@@ -107,19 +107,25 @@ class SiteTests(unittest.TestCase):
         css = (ASSETS / 'site.css').read_text()
         self.assertIn('width: 1lh; height: 1lh;', css)
 
-    def test_dither_art_is_only_a_top_banner_on_every_page(self):
+    def test_dither_art_frames_both_edges_without_covering_reading(self):
         for path in OUTPUT.rglob('*.html'):
             text = path.read_text()
             main = text.split('<main ', 1)[1].split('</main>', 1)[0]
-            self.assertEqual(text.count('id="art-header"'), 1)
-            self.assertEqual(text.count('id="header-art-canvas"'), 1)
+            ids = [attrs['id'] for _, attrs in Page(text).tags if 'id' in attrs]
+            self.assertEqual(len(ids), len(set(ids)), path)
+            for position in ('header', 'footer'):
+                self.assertEqual(text.count(f'id="art-{position}"'), 1)
+                self.assertEqual(text.count(f'id="{position}-art-canvas"'), 1)
+                self.assertNotIn(f'{position}-art-canvas', main)
+                self.assertIn(f'aria-label="Pause art animations ({position} control)"', text)
             self.assertLess(text.index('id="art-header"'), text.index('<div class="page">'))
-            self.assertNotIn('header-art-canvas', main)
+            self.assertGreater(text.index('id="art-footer"'), text.index('</footer>'))
             self.assertIn('src="/header-art.js"', text)
-            self.assertIn('aria-label="Pause header animation"', text)
         css = (ASSETS / 'site.css').read_text()
-        self.assertIn('--art-height: 150px;', css)
-        self.assertIn('--art-height: 100px;', css)
+        self.assertIn('--art-height: 180px;', css)
+        self.assertIn('--art-height: 120px;', css)
+        self.assertIn('--art-fade-direction: to top;', css)
+        self.assertIn('rgba(0,0,0,.03) 90%, transparent 100%', css)
         self.assertIn('height: var(--art-height)', css)
         self.assertIn("url('/header-art-fallback.svg')", css)
         ET.parse(ASSETS / 'header-art-fallback.svg')
@@ -145,6 +151,17 @@ class SiteTests(unittest.TestCase):
         self.assertIn("img-src 'self' data:", config)
         self.assertNotIn("'unsafe-inline'", config)
         self.assertNotIn("'unsafe-eval'", config)
+
+    def test_pages_preserves_security_headers_and_pinned_vendor_caching(self):
+        headers = (ASSETS / '_headers').read_text()
+        nginx = (ROOT / 'ops/nginx.conf').read_text()
+        policy = nginx.split('add_header Content-Security-Policy "', 1)[1].split('"', 1)[0]
+        self.assertIn('Content-Security-Policy: ' + policy, headers)
+        self.assertIn('X-Content-Type-Options: nosniff', headers)
+        self.assertIn('X-Frame-Options: DENY', headers)
+        self.assertIn('X-Robots-Tag: noindex, nofollow', headers)
+        self.assertIn('/vendor/*\n  Cache-Control: public, max-age=31536000, immutable', headers)
+        self.assertTrue((OUTPUT / '_headers').is_file())
 
     def test_output_contains_no_source_secrets_or_symlinks(self):
         for path in OUTPUT.rglob('*'):

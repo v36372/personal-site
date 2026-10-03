@@ -5,7 +5,7 @@ warm monospace UI, writing and bookmarks tabs, dense saved-link lists, search,
 filters, and timeline browsing. Readable Markdown articles, archives, topics,
 and RSS remain from the earlier lucumr-inspired blog. The small COBE globe marks
 Ho Chi Minh City in the header only, as a one-text-line-sized icon. Warm/light/dark themes are
-saved locally. An animated Capy-style dither strip sits at the very top of
+saved locally. Animated Capy-style dither bands frame the top and bottom of
 every page, never behind reading content. There are no third-party fonts,
 analytics, or runtime requests.
 
@@ -17,16 +17,19 @@ assets, or posts have been copied. This implementation is independent.
 - Repository: https://github.com/v36372/personal-site (**public source code**)
 - BB project: `tinnguyen` (`proj_p965in7xju`)
 - Source: `/home/exedev/codes/tinnguyen` on `v36372-bb`
-- Private preview: https://tinnguyen.exe.xyz/
-- VM: `tinnguyen`, Singapore; `ghcr.io/ryanlewis/exeslim:latest` at creation
-- Resources: 1 vCPU, 2 GB RAM, 10 GB disk
-- Server: nginx on port 8000, managed by systemd
-- Served files: `/srv/tinnguyen/current`, pointing at a generated release
+- Private preview: https://tinnguyen.pages.dev/
+- Hosting: Cloudflare Pages; assets served from Cloudflare's global edge
+- Build: native Pages GitHub integration, `main` → `bash ops/pages-build.sh` → `dist/`
+- Account: `700a6c6ad6178d92f1abcf67630f3a95`; project: `tinnguyen`
+- Legacy VM: `tinnguyen.exe.xyz`, kept private as a rollback copy only
 
-**Keep the site private until Tin explicitly asks to publish.** The exe.dev
-proxy requires owner authentication; anonymous visitors are redirected to
-login. There are no public share links. Deployment checks private visibility
-before uploading and refuses to deploy to a public VM. It never changes access.
+**Keep the site private until Tin explicitly asks to publish.** Cloudflare
+Access requires the owner's existing Google login. Its application protects
+**both** `tinnguyen.pages.dev` and `*.tinnguyen.pages.dev`, including immutable
+deployment URLs. Anonymous requests redirect to Access; previews are disabled.
+The rebuild helper verifies owner-only policies and anonymous login redirects
+before deploying and never changes access settings. `noindex` is not a privacy
+barrier; keep Access enabled even though the source repository is public.
 
 The starter article is explicitly a **draft/layout preview**, not a published
 post. No personal biography, employment, hobbies, or contact links are invented.
@@ -34,8 +37,9 @@ post. No personal biography, employment, hobbies, or contact links are invented.
 ## Local development
 
 Requirements on the development machine: Python 3.11+, `uv`, and Node.js 22.7+.
-The deployment VM needs only nginx — no Python, Node, or development toolchain.
-Python dependencies are pinned in `uv.lock`.
+Cloudflare's v3 build image uses Python 3.12 and Node 22.20.0;
+`ops/pages-build.sh` installs pinned uv 0.12.7 and runs the same tests locally
+and on Pages. Python dependencies are pinned in `uv.lock`.
 
 ```sh
 uv sync --locked
@@ -124,7 +128,10 @@ example, this describes the schema (it is not an actual saved bookmark):
 - `public/`: CSS, favicon, and self-hosted globe assets only
 - `scripts/build.py`: Markdown-to-HTML generator
 - `scripts/serve.py`: local preview server with automatic rebuilds
-- `scripts/deploy.py`: owner-authenticated static deployment with privacy guard
+- `public/_headers`: Pages security headers, CSP, noindex, and pinned-vendor caching
+- `ops/pages-build.sh`: native Pages build and full test command
+- `scripts/deploy_pages.py`: owner-only Access check and committed-main rebuild
+- `scripts/deploy.py`: legacy VM uploader with private-visibility guard
 - `dist/`: generated output, ignored by Git; never edit by hand
 
 ## Globe
@@ -148,12 +155,14 @@ COBE's empty and `:root{}` style blocks. No `unsafe-inline` or `unsafe-eval` is
 allowed. Bindable IDs are omitted to avoid dynamic styles and CSS-anchor browser
 dependencies. Recheck the policy if upgrading COBE.
 
-## Animated dither header
+## Animated dither header and footer
 
 The art strip is inspired by lucumr's top-of-page composition and adapted from
 [Aura's Capy renderer](https://github.com/MateoCerquetella/bb-plugins/tree/acaa0378891adb6fc4d6c643b4c939ecfb1997c2/plugins/aura/lib).
-It is **150px tall on desktop, 100px on mobile**, full-width, fading into the
-current theme. The rest of the page has no shader/wallpaper layers.
+Both bands are **180px tall on desktop, 120px on mobile**, full-width. A long,
+eased multi-stop mask fades each band toward the body (the footer reverses the
+header fade), with no hard gradient shoulder. The rest of the page has no
+shader/wallpaper layers. Noise drifts at 0.35× speed, slower than the original.
 
 How the effect works:
 
@@ -164,18 +173,19 @@ How the effect works:
 3. The framebuffer is **one-third CSS resolution**, scaled up with
    `image-rendering: pixelated`. This gives approximately **3px dither cells**
    without paying for full-retina shading.
-4. The foreground comes from the theme's accent. A CSS mask fades the art to
-   transparent at the bottom, leaving the reading column entirely clear.
+4. The foreground comes from the theme's accent. Mirrored CSS masks ease the
+   art to transparent at each body-facing edge, leaving reading entirely clear.
 
 Files and tuning:
 
-- `public/header-art.js`: website-only renderer and lifecycle; at most 15 fps,
-  pause/play (remembered within the tab), hidden-tab/offscreen suspension,
-  and static rendering for reduced motion.
-- `public/dither-settings.js`: Capy's noise/Bayer settings, 0.5× clock speed,
-  initial phase 40, and GPU caps (96,000 pixels / 4096px maximum side).
-- `templates/_header-art.html` and `public/site.css`: top-only structure,
-  height, control placement, and bottom fade.
+- `public/header-art.js`: shared header/footer renderer and lifecycle; at most
+  15 fps per visible band on one animation clock. Both controls pause/play both
+  bands (remembered within the tab). Offscreen bands initialize lazily; hidden
+  tabs/offscreen bands do not animate. Reduced motion renders static art.
+- `public/dither-settings.js`: Capy's noise/Bayer settings, 0.35× clock speed,
+  initial phase 40, and GPU caps (96,000 pixels / 4096px maximum side per band).
+- `templates/_header-art.html` (parameterized by position) and `public/site.css`:
+  shared structure, height, control placement, and mirrored eased fades.
 - `public/header-art-fallback.svg`: original static Bayer-cloud art used
   without JavaScript/WebGL or after context loss.
 
@@ -185,89 +195,79 @@ adapter is **MIT**. Licenses, source hashes, Capy provenance, and modification
 notices are shipped in `public/vendor/DITHER-NOTICES.txt` and adjacent files.
 No Capy service, tracking, app code, product assets, or Lucumr code is copied.
 
-## Deploy privately
+## Automatic private deployment (Cloudflare Pages)
 
-From the BB VM, the attached exe integration supplies authentication:
+Push a tested commit to `main` in `v36372/personal-site`. Cloudflare's native
+GitHub integration builds and tests it with `bash ops/pages-build.sh`, then
+serves only `dist/` at https://tinnguyen.pages.dev/. No exe.dev VM serves the
+new website, and no self-hosted runner or GitHub deploy secret is needed.
+
+Configuration:
+
+- Production branch: `main`; production auto-deployment enabled.
+- Build command: `bash ops/pages-build.sh`; output directory: `dist/`.
+- Build image: v3; `PYTHON_VERSION=3.12`, `NODE_VERSION=22.20.0`.
+- Drafts are included for private review; feeds/sitemaps still exclude drafts.
+- Branch and PR preview deployments: disabled. The Access wildcard still
+  protects every generated deployment URL, including production hashes.
+- Access application: `1add1fd3-ef6b-4897-ac60-390c5b60440b`, owner-only Google
+  login, 24-hour sessions, main AND wildcard Pages hosts. Never add bypasses.
+- `public/_headers` preserves the nginx CSP/security headers. Version-pinned
+  vendor assets get a one-year browser cache; Pages handles edge caching,
+  compression, HTTPS, and conditional requests for the remaining files.
+- `.github/workflows/deploy.yml` now runs **checks only**, on GitHub-hosted
+  runners. Pages independently runs all checks before publishing. PR code
+  never executes on the old self-hosted runner.
+
+From the BB VM, the attached Cloudflare integration supplies authentication
+without exposing the API token:
 
 ```sh
-make deploy   # tests and builds a private preview, then uploads dist/ only
-make setup    # first deployment to a fresh exeslim VM: install nginx, deploy
+make test
+git push origin main                   # native Pages auto-deployment
+python3 scripts/deploy_pages.py --check # verify owner-only protection
+make deploy                            # rebuild committed GitHub main
 ```
 
-From another development machine, build first and use owner SSH access:
+`make deploy` does **not** upload uncommitted local changes. Commit and push
+first. Its privacy guard checks the Access configuration and actual anonymous
+requests to both the main and wildcard hosts. From another machine, set
+`CLOUDFLARE_API_URL=https://api.cloudflare.com/client/v4`, a scoped
+`CLOUDFLARE_API_TOKEN`, and `CLOUDFLARE_ACCESS_EMAIL` to the owner's login email.
+Keep credentials outside the repository.
+
+Canonical, RSS, and sitemap URLs default to `https://tinnguyen.pages.dev`.
+Override `SITE_URL` when building for a future custom domain. The old
+`*.exe.xyz` hostname belongs to exe.dev and cannot be reassigned as a Pages
+custom domain without its DNS owner. No unrelated DNS records were changed.
+
+Inspect builds and roll back in the Cloudflare Pages dashboard:
+
+https://dash.cloudflare.com/700a6c6ad6178d92f1abcf67630f3a95/pages/view/tinnguyen
+
+GitHub checks: https://github.com/v36372/personal-site/actions
+
+## Legacy VM rollback copy
+
+The private nginx copy at https://tinnguyen.exe.xyz/ is retained, not updated
+automatically. The `tinnguyen-ci` runner service has been stopped and its VM
+deploy integration detached. Neither VM has been deleted; request removal
+when the rollback copy is no longer needed.
+
+The old scripts remain available for an explicit VM rollback:
 
 ```sh
-make preview
+SITE_URL=https://tinnguyen.exe.xyz make deploy-vm
+SITE_URL=https://tinnguyen.exe.xyz make setup-vm
+# Or, after a preview build, use owner SSH:
 python3 scripts/deploy.py --ssh
 ```
 
-Source Markdown, templates, tests, and secrets are **not** uploaded. The script
-validates nginx configuration, swaps the release symlink atomically, and checks
-local HTTP. Previous releases are retained for rollback. HTTPS API requests
-have a 64 KiB limit; use `--ssh` if the generated site grows beyond that.
-
-To restore private access (never enable public access while editing):
-
-```sh
-ssh exe.dev share port tinnguyen 8000
-ssh exe.dev share set-private tinnguyen
-```
-
-Feeds and all article URLs remain behind the same private proxy authentication.
-`make build` is a content build mode, not an instruction to publish or share.
-
-## Automatic deployment (self-hosted GitHub Actions)
-
-`.github/workflows/deploy.yml` runs on pushes to `main` and manual dispatches
-on `main`. It does **not** run on pull requests. The repository/ref guard,
-read-only GitHub token, pinned checkout action, and serialized deployment group
-are intentional; do not broaden them to untrusted PR code.
-
-- Dedicated runner VM: `tinnguyen-ci.exe.xyz` (exeslim; 1 vCPU, 2 GB, 10 GB).
-- Repo-scoped runner: `tinnguyen-ci`; custom label `personal-site-deploy`.
-- Persistent service: `actions.runner.v36372-personal-site.tinnguyen-ci.service`.
-- Jobs execute `make deploy`: all checks, a private draft-preview build, and
-  atomic deployment to the existing `tinnguyen` VM. The website VM remains
-  a minimal nginx host; no build tools or GitHub runner are installed there.
-- The runner uses `EXE_API_URL=https://personal-site-deploy.int.exe.xyz/exec`.
-  Its bearer key is held by exe.dev, not in GitHub secrets, the repository, or
-  the runner's environment. Allowed commands: `ssh tinnguyen` and `share show`;
-  no VM creation/removal or visibility changes. The key expires **2027-10-03**;
-  rotate the `personal-site-ci-deploy` key and proxy credential before then.
-- Enrollment used a short-lived registration token through a temporary,
-  caller-verified exe.dev peer route. The token file and bootstrap peer were
-  deleted after registration. Runner-generated credentials remain protected
-  on the dedicated CI VM.
-- `ops/runner-bootstrap.sh` records checksummed runner/Node releases and the
-  hash-pinned uv tool used to prepare this machine. The runner auto-updates.
+These commands preserve the legacy VM's private access. Source, secrets, and
+runner state are never uploaded; nginx serves only `/srv/tinnguyen/current`
+on port 8000. Existing releases are retained for atomic symlink rollback.
 
 **The repository is public, even though the website is private.** Do not commit
-private bookmarks, confidential drafts, tokens, or personal exports to it.
-A `draft=true` or `publish=false` flag affects generated pages, not GitHub
-source visibility. Make the repo private or use a separate private data source
-before storing information that must remain confidential.
-
-Inspect/restart the runner using owner access:
-
-```sh
-ssh tinnguyen-ci.exe.xyz 'sudo systemctl status actions.runner.v36372-personal-site.tinnguyen-ci.service --no-pager'
-ssh tinnguyen-ci.exe.xyz 'sudo journalctl -u actions.runner.v36372-personal-site.tinnguyen-ci.service -n 50 --no-pager'
-```
-
-Actions: https://github.com/v36372/personal-site/actions
-Keep this public-repo self-hosted runner limited to trusted main-branch code.
-
-## Operations
-
-```sh
-ssh tinnguyen.exe.xyz 'sudo nginx -t; systemctl status nginx --no-pager'
-ssh tinnguyen.exe.xyz 'sudo journalctl -u nginx -n 50 --no-pager'
-ssh tinnguyen.exe.xyz 'ls -l /srv/tinnguyen/current /srv/tinnguyen/releases'
-```
-
-For rollback, atomically point `/srv/tinnguyen/current` at an earlier release
-using a new symlink and `mv -Tf`, as the deploy script does. No rebuild is needed.
-
-exeslim does not auto-update packages. Periodically review/apply Ubuntu security
-updates (`sudo apt-get update && sudo apt-get dist-upgrade`) and restart nginx.
-VM image updates do not patch an existing VM.
+confidential drafts, private bookmarks, tokens, or personal exports. A draft
+flag controls rendered output, not GitHub source visibility. Make the repo
+private or use a separate private data source for confidential content.

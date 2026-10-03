@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, time, timezone
 from email.utils import format_datetime
 import math
+import os
 from pathlib import Path
 import re
 import shutil
@@ -22,7 +23,7 @@ else:
     from bookmarks import KINDS, load_bookmarks
 
 ROOT = Path(__file__).resolve().parents[1]
-SITE_URL = "https://tinnguyen.exe.xyz"
+SITE_URL = os.environ.get("SITE_URL", "https://tinnguyen.pages.dev").rstrip("/")
 ATOM = "http://www.w3.org/2005/Atom"
 SITEMAP = "http://www.sitemaps.org/schemas/sitemap/0.9"
 MARKDOWN = MarkdownIt("commonmark", {"html": False}).enable("table")

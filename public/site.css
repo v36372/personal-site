@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  --art-height: 150px;
+  --art-height: 180px;
   --paper: #282722;
   --panel: #302f29;
   --ink: #e6ddc6;
@@ -26,13 +26,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 [hidden] { display: none !important; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
-.art-header { position: relative; isolation: isolate; width: 100%; height: var(--art-height); overflow: hidden; background: var(--paper); }
-.art-surface { position: absolute; inset: 0; overflow: hidden; pointer-events: none; -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%); mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%); }
+.art-banner { position: relative; isolation: isolate; width: 100%; height: var(--art-height); overflow: hidden; background: var(--paper); --art-fade-direction: to bottom; --art-fade: linear-gradient(var(--art-fade-direction), #000 0%, rgba(0,0,0,.98) 12%, rgba(0,0,0,.86) 26%, rgba(0,0,0,.64) 42%, rgba(0,0,0,.36) 60%, rgba(0,0,0,.14) 76%, rgba(0,0,0,.03) 90%, transparent 100%); }
+.art-footer { --art-fade-direction: to top; }
+.art-surface { position: absolute; inset: 0; overflow: hidden; pointer-events: none; -webkit-mask-image: var(--art-fade); mask-image: var(--art-fade); }
 .art-surface canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .art-fallback { position: absolute; inset: 0; background: var(--accent); opacity: .55; -webkit-mask-image: url('/header-art-fallback.svg'); mask-image: url('/header-art-fallback.svg'); -webkit-mask-size: cover; mask-size: cover; -webkit-mask-position: center; mask-position: center; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
 .art-motion { position: absolute; right: 14px; bottom: 10px; min-height: 28px; z-index: 1; padding: 5px 9px; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); color: var(--muted); font-size: 9px; }
 .art-motion:hover { color: var(--accent); }
-.page { width: min(980px, 100%); min-height: calc(100vh - var(--art-height)); margin: 0 auto; padding: 42px 48px 28px; display: flex; flex-direction: column; }
+.page { width: min(980px, 100%); min-height: calc(100vh - var(--art-height) - var(--art-height)); margin: 0 auto; padding: 42px 48px 28px; display: flex; flex-direction: column; }
 .skip-link { position: absolute; top: -80px; left: 20px; padding: 8px 16px; z-index: 10; background: var(--paper); }
 .skip-link:focus { top: 12px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
@@ -172,7 +173,7 @@ h1 { margin: 0; font-size: 28px; letter-spacing: -.04em; overflow-wrap: break-wo
   .home-columns { gap: 28px; }
 }
 @media (max-width: 640px) {
-  :root { --art-height: 100px; }
+  :root { --art-height: 120px; }
   .art-motion { min-height: 32px; right: 10px; bottom: 6px; }
   .page { padding: 26px 24px; }
   .site-header { gap: 12px; align-items: flex-start; }

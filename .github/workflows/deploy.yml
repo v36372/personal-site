@@ -1,34 +1,37 @@
-name: Deploy private website
+name: Check website (Cloudflare Pages deploys)
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: personal-site-private-preview
-  cancel-in-progress: false
+  group: personal-site-check-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  deploy:
-    if: github.repository == 'v36372/personal-site' && github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, linux, x64, personal-site-deploy]
-    timeout-minutes: 15
-    env:
-      EXE_API_URL: https://personal-site-deploy.int.exe.xyz/exec
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - name: Check out trusted main commit
+      - name: Check out source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
-          fetch-depth: 1
-      - name: Verify build tools
-        run: |
-          python3 --version
-          node --version
-          uv --version
-      - name: Test, build, and deploy private preview
-        run: make deploy
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22.20.0'
+      - name: Test the Pages build
+        run: bash ops/pages-build.sh
+# Cloudflare's native GitHub integration builds main with the same command,
+# then publishes dist/ at tinnguyen.pages.dev. No exe.dev runner or CI secrets.
+# Cloudflare branch/PR previews are disabled; all deployment URLs require Access.

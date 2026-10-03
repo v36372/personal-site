@@ -1,4 +1,4 @@
-Animated header art — source and licensing
+Animated header/footer art — source and licensing
 
 Shader module: aura-capy-shaders.js
 Copied unchanged (only its extension changed from .ts to .js) from:
@@ -17,9 +17,10 @@ Runtime: ../header-art.js and ../dither-settings.js
 Adapted from Aura's lib/capy-effect.ts (MIT, Copyright 2026 Mateo Cerquetella).
 Full license: aura-LICENSE.txt
 Changes: removed BB/plugin/image-upload integration; scoped to a fixed-height
-website header; added a theme-aware static SVG fallback, explicit pause/play,
-session-local motion preference, a 96,000-pixel framebuffer cap, and website
-visibility/lifecycle handling. Shader strings remain unchanged.
+website header/footer; added mirrored eased fades, a slower shared clock, lazy
+offscreen initialization, a theme-aware static SVG fallback, synced pause/play,
+session-local motion preference, a 96,000-pixel framebuffer cap per band, and
+website visibility/lifecycle handling. Shader strings remain unchanged.
 
 The banner layout, fade treatment, and fallback artwork are original to this
 website. Lucumr is only an inspiration for a short top-of-page art strip; no

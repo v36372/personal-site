@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { bufferSize, MAX_BUFFER_PIXELS, MAX_BUFFER_SIDE, FRAME_INTERVAL, INITIAL_TIME, SHADER_SETTINGS } from '../public/dither-settings.js';
+import { bufferSize, MAX_BUFFER_PIXELS, MAX_BUFFER_SIDE, FRAME_INTERVAL, INITIAL_TIME, ANIMATION_SPEED, SHADER_SETTINGS } from '../public/dither-settings.js';
 import { VERTEX_SHADER, DITHERING_SHADER } from '../public/vendor/aura-capy-shaders.js';
 
 test('retains the Capy simplex / Bayer8 / 3px pipeline', () => {
@@ -10,6 +10,7 @@ test('retains the Capy simplex / Bayer8 / 3px pipeline', () => {
   assert.equal(SHADER_SETTINGS.u_scale, 2);
   assert.equal(INITIAL_TIME, 40);
   assert.equal(FRAME_INTERVAL, 1000 / 15);
+  assert.equal(ANIMATION_SPEED, 0.35);
   assert.ok(VERTEX_SHADER.startsWith('#version 300 es'));
   assert.ok(DITHERING_SHADER.includes('getSimplexNoise'));
   assert.ok(DITHERING_SHADER.includes('uniform float u_time'));
@@ -23,8 +24,8 @@ test('Bayer8 is a complete ordered threshold matrix', () => {
 });
 
 test('renders a one-third-size framebuffer, not retina/full-page resolution', () => {
-  assert.deepEqual(bufferSize(1440, 150), { width: 480, height: 50, pixelRatio: 1 / 3 });
-  assert.deepEqual(bufferSize(390, 100), { width: 130, height: 33, pixelRatio: 1 / 3 });
+  assert.deepEqual(bufferSize(1440, 180), { width: 480, height: 60, pixelRatio: 1 / 3 });
+  assert.deepEqual(bufferSize(390, 120), { width: 130, height: 40, pixelRatio: 1 / 3 });
 });
 
 test('bounds GPU work on ultrawide and pathological dimensions', () => {

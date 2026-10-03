@@ -1,7 +1,7 @@
 // Bounded defaults adapted from Aura's Capy renderer; see vendor/DITHER-NOTICES.txt.
 export const FRAME_INTERVAL = 1000 / 15;
 export const INITIAL_TIME = 40;
-export const ANIMATION_SPEED = 0.5;
+export const ANIMATION_SPEED = 0.35;
 export const MAX_BUFFER_PIXELS = 96000;
 export const MAX_BUFFER_SIDE = 4096;
 export const SHADER_SETTINGS = Object.freeze({
