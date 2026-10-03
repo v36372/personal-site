@@ -48,7 +48,7 @@ class BookmarkTests(unittest.TestCase):
         self.save([{'title': f'Reading {index}', 'url': f'https://example.test/{index}',
                     'saved': '2026-01-02'} for index in range(501)])
         build(self.root, include_drafts=True)
-        page = (self.root / 'dist/bookmarks/index.html').read_text()
+        page = (self.root / 'dist/reading/index.html').read_text()
         self.assertEqual(page.count('class="bookmark-row"'), 501)
         self.assertIn('Reading 500', page)
         self.assertIn('501 saved links', page)
@@ -58,11 +58,11 @@ class BookmarkTests(unittest.TestCase):
         self.save([{'title': 'Private link', 'url': 'https://example.test/private'},
                    {'title': 'Reviewed link', 'url': 'https://example.test/reviewed', 'publish': True}])
         build(self.root)
-        text = (self.root / 'dist/bookmarks/index.html').read_text()
+        text = (self.root / 'dist/reading/index.html').read_text()
         self.assertIn('Reviewed link', text)
         self.assertNotIn('Private link', text)
         build(self.root, include_drafts=True)
-        text = (self.root / 'dist/bookmarks/index.html').read_text()
+        text = (self.root / 'dist/reading/index.html').read_text()
         self.assertIn('Private link', text)
         self.assertIn('Reviewed link', text)
 
@@ -75,7 +75,7 @@ class BookmarkTests(unittest.TestCase):
         self.assertEqual([item.url.rsplit('/', 1)[-1] for item in entries], ['new', 'old', 'unknown'])
         self.assertEqual(entries[0].tags, ('Reading',))
         build(self.root, include_drafts=True)
-        text = (self.root / 'dist/bookmarks/index.html').read_text()
+        text = (self.root / 'dist/reading/index.html').read_text()
         self.assertIn('October 2026', text)
         self.assertIn('Date not recorded', text)
         self.assertIn('value="Reading"', text)
@@ -84,7 +84,7 @@ class BookmarkTests(unittest.TestCase):
         self.save([{'title': '<script>alert(1)</script>', 'url': 'https://example.test/',
                     'note': '<img src=x onerror=alert(1)>', 'tags': ["Reader's notes"]}])
         build(self.root, include_drafts=True)
-        text = (self.root / 'dist/bookmarks/index.html').read_text()
+        text = (self.root / 'dist/reading/index.html').read_text()
         self.assertNotIn('<script>alert(1)</script>', text)
         self.assertNotIn('<img src=x', text)
         self.assertIn('&lt;script&gt;', text)

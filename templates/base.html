@@ -32,8 +32,8 @@
       </div>
     </header>
     <nav class="site-nav" aria-label="Main navigation">
+      <a href="/reading/"{% if active == 'reading' %} aria-current="page"{% endif %}>Reading <span class="nav-count" aria-hidden="true">{{ bookmarks|length }}</span></a>
       <a href="/"{% if active == 'writing' %} aria-current="page"{% endif %}>Writing</a>
-      <a href="/bookmarks/"{% if active == 'bookmarks' %} aria-current="page"{% endif %}>Bookmarks <span class="nav-count" aria-hidden="true">{{ bookmarks|length }}</span></a>
       <a href="/about/"{% if active == 'about' %} aria-current="page"{% endif %}>About</a>
       <a class="feed-link" href="/feed.xml">RSS <span aria-hidden="true">↗</span></a>
     </nav>
@@ -42,7 +42,7 @@
     </main>
     <footer class="site-footer">
       <span>© {{ year }} Tin Nguyen</span>
-      <span><a href="/">All writing</a><span class="footer-separator" aria-hidden="true"> / </span><a href="/feed.xml">RSS feed</a></span>
+      <span class="footer-links"><a href="https://github.com/v36372" rel="me" aria-label="Tin Nguyen on GitHub (@v36372)">GitHub</a><span class="footer-separator" aria-hidden="true"> / </span><a href="https://x.com/v36372" rel="me" aria-label="Tin Nguyen on X (@v36372)">X</a><span class="footer-separator" aria-hidden="true"> / </span><a href="/feed.xml">RSS feed</a></span>
     </footer>
   </div>
   {% with art_position = 'footer' %}{% include "_header-art.html" %}{% endwith %}

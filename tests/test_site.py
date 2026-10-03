@@ -79,7 +79,7 @@ class SiteTests(unittest.TestCase):
             self.assertIn(('link', {'rel': 'icon', 'href': 'data:,'}), Page(text).tags)
         self.assertFalse((OUTPUT / 'favicon.svg').exists())
 
-    def test_pages_content_build_excludes_drafts_and_all_wip_copy(self):
+    def test_production_build_excludes_drafts_and_all_wip_copy(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / 'site'
             build(ROOT, output=output)
@@ -93,7 +93,7 @@ class SiteTests(unittest.TestCase):
                     with self.subTest(page=str(path.relative_to(output)), phrase=phrase):
                         self.assertNotIn(phrase, text)
             self.assertFalse((output / 'favicon.svg').exists())
-            self.assertIn('make build', (ROOT / 'ops/pages-build.sh').read_text())
+            self.assertIn('make build', (ROOT / 'ops/vm-update.sh').read_text())
 
     def test_private_preview_is_noindex(self):
         for path in OUTPUT.rglob('*.html'):
@@ -105,7 +105,7 @@ class SiteTests(unittest.TestCase):
         self.assertEqual([item.findtext('title') for item in items], [post.title for post in self.published[:20]])
         sitemap = ET.parse(OUTPUT / 'sitemap.xml')
         urls = [node.text for node in sitemap.findall('.//{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
-        expected = ['/', '/about/', '/bookmarks/'] + [post.url for post in self.published]
+        expected = ['/', '/about/', '/reading/'] + [post.url for post in self.published]
         expected += ['/tags/' + tag_slug(tag) + '/' for tag in sorted({tag for post in self.published for tag in post.tags})]
         self.assertEqual(urls, [SITE_URL + path for path in expected])
         for post in self.drafts:
@@ -148,7 +148,9 @@ class SiteTests(unittest.TestCase):
         for path in OUTPUT.rglob('*.html'):
             self.assertNotIn('href="/archive', path.read_text())
         self.assertNotIn('/archive/', (OUTPUT / 'sitemap.xml').read_text())
-        self.assertEqual((OUTPUT / '_redirects').read_text(), '/archive / 301\n/archive/ / 301\n')
+        config = (ROOT / 'ops/nginx.conf').read_text()
+        self.assertIn('location = /archive { return 301 /; }', config)
+        self.assertIn('location = /archive/ { return 301 /; }', config)
 
     def test_dither_art_frames_both_edges_without_covering_reading(self):
         for path in OUTPUT.rglob('*.html'):
@@ -195,16 +197,30 @@ class SiteTests(unittest.TestCase):
         self.assertNotIn("'unsafe-inline'", config)
         self.assertNotIn("'unsafe-eval'", config)
 
-    def test_pages_preserves_security_headers_and_pinned_vendor_caching(self):
-        headers = (ASSETS / '_headers').read_text()
-        nginx = (ROOT / 'ops/nginx.conf').read_text()
-        policy = nginx.split('add_header Content-Security-Policy "', 1)[1].split('"', 1)[0]
-        self.assertIn('Content-Security-Policy: ' + policy, headers)
-        self.assertIn('X-Content-Type-Options: nosniff', headers)
-        self.assertIn('X-Frame-Options: DENY', headers)
-        self.assertIn('X-Robots-Tag: noindex, nofollow', headers)
-        self.assertIn('/vendor/*\n  Cache-Control: public, max-age=31536000, immutable', headers)
-        self.assertTrue((OUTPUT / '_headers').is_file())
+    def test_reading_is_first_and_social_links_are_on_every_page(self):
+        for path in OUTPUT.rglob('*.html'):
+            text = path.read_text()
+            nav = text.split('<nav class="site-nav"', 1)[1].split('</nav>', 1)[0]
+            links = [attrs['href'] for tag, attrs in Page('<nav ' + nav).tags if tag == 'a']
+            self.assertEqual(links[:3], ['/reading/', '/', '/about/'])
+            self.assertIn('Reading', nav)
+            self.assertNotIn('Bookmarks', nav)
+            self.assertNotIn('tinnguyen.exe.xyz', text)
+            for profile in ('https://github.com/v36372', 'https://x.com/v36372'):
+                self.assertTrue(any(tag == 'a' and attrs.get('href') == profile and attrs.get('rel') == 'me'
+                                    for tag, attrs in Page(text).tags))
+        reading = (OUTPUT / 'reading/index.html').read_text()
+        self.assertIn('<h1>Reading</h1>', reading)
+        self.assertIn('Reading — Tin Nguyen', reading)
+        self.assertFalse((OUTPUT / 'bookmarks').exists())
+
+    def test_cloudflare_deployment_code_and_artifacts_are_gone(self):
+        for name in ('scripts/deploy_pages.py', 'ops/pages-build.sh', 'tests/test_pages.py',
+                     'public/_headers', 'public/_redirects'):
+            self.assertFalse((ROOT / name).exists())
+        self.assertNotIn('deploy-pages', (ROOT / 'Makefile').read_text())
+        self.assertFalse((OUTPUT / '_headers').exists())
+        self.assertFalse((OUTPUT / '_redirects').exists())
 
     def test_output_contains_no_source_secrets_or_symlinks(self):
         for path in OUTPUT.rglob('*'):

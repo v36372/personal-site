@@ -1,7 +1,7 @@
 # Tin Nguyen — a personal notebook
 
 A compact personal notebook inspired by [ludwigabap.com](https://ludwigabap.com/):
-warm monospace UI, writing and bookmarks tabs, dense saved-link lists, search,
+warm monospace UI, Reading → Writing → About navigation, dense saved-link lists, search,
 filters, and timeline browsing. Readable Markdown articles, topics, and RSS
 remain from the earlier lucumr-inspired blog. Writing is listed on the home page;
 there is no separate Archive page. A larger COBE globe marks Ho Chi Minh City
@@ -17,11 +17,12 @@ assets, or posts have been copied. This implementation is independent.
 - Repository: https://github.com/v36372/personal-site (**public source code**)
 - BB project: `tinnguyen` (`proj_p965in7xju`)
 - Source: `/home/exedev/codes/tinnguyen` on `v36372-bb`
-- Website: https://tinnguyen.exe.xyz/ (**private**, exe.dev owner login)
+- Website: https://tinng.exe.xyz/ (**private**, exe.dev owner login)
 - Hosting: one exeslim VM in Singapore, 1 CPU / 2GB RAM / 10GB disk
 - Updates: trusted GitHub `main` → tests → reviewed build → atomic nginx release
 - Checks: GitHub-hosted runners; **no dedicated CI VM**
-- Previous Pages project: retained privately, automatic deployments disabled
+- Confirmed profiles: [GitHub](https://github.com/v36372) and [X](https://x.com/v36372)
+- VM name: `tinng` (the original VM was renamed, not replaced)
 
 **Keep the site private until Tin explicitly asks to publish.** exe.dev gates
 the HTTPS proxy; nginx serves only generated HTML/assets on port 8000. Deploys
@@ -82,7 +83,11 @@ quotes, fenced code blocks, and tables are supported. Raw HTML is escaped.
 Navigation, topic pages, reading times, and feeds are generated
 from the posts. No manual index editing is needed.
 
-## Bookmarks
+## Reading
+
+The Reading tab lives at `/reading/` and comes first in navigation, followed
+by Writing and About. Old `/bookmarks` URLs redirect here, preserving searches.
+The underlying bookmark data/schema/filter implementation keeps its names.
 
 Tin chose to **set up the tab first**. The collection is intentionally empty;
 no bookmarks have been invented, copied from the reference, or fetched from an
@@ -127,11 +132,9 @@ example, this describes the schema (it is not an actual saved bookmark):
 - `public/`: CSS, self-hosted renderers/shaders, and static fallbacks (no favicon)
 - `scripts/build.py`: Markdown-to-HTML generator
 - `scripts/serve.py`: local preview server with automatic rebuilds
-- `public/_headers`: Pages security headers, CSP, noindex, and pinned-vendor caching
 - `ops/bootstrap.sh`: verified VM tooling and nginx installation
 - `ops/vm-update.sh`, `ops/tinnguyen-update.*`: trusted-main update service/timer
 - `scripts/deploy.py`: atomic uploader/local updater with private-visibility guard
-- `ops/pages-build.sh`, `scripts/deploy_pages.py`: retired Pages rollback helpers
 - `dist/`: generated output, ignored by Git; never edit by hand
 
 ## Globe
@@ -216,9 +219,13 @@ leave the previous release and deployed commit unchanged.
 - `personal-site-status.int.exe.xyz` is a vaulted, read-only integration on the
   website VM. Its 1-year signing key permits only `share show`, not shell,
   management or sharing changes. Rotate before expiry (2027-10-03).
-- Canonical/RSS/sitemap URLs default to `https://tinnguyen.exe.xyz`.
+- Canonical/RSS/sitemap URLs default to `https://tinng.exe.xyz`.
+- The original VM is `tinng`. Local updates verify VM identity to prevent
+  deploying on a duplicate or missing a rename. Internal `/srv/tinnguyen` paths
+  and `tinnguyen-update.*` unit names are unchanged; these are not public URLs.
 - The larger About globe, dither bands, and finished UI are unchanged.
-- nginx handles `/archive` and `/archive/` → `/` redirects, relative directory
+- nginx handles `/archive` and `/archive/` → `/`, `/bookmarks` → `/reading/`
+  (including query parameters), relative directory
   redirects behind HTTPS, gzip, noindex, and immutable vendor caching.
   Ordinary assets revalidate to avoid mixing old JS/CSS with new HTML.
 
@@ -246,13 +253,9 @@ Do not recreate it. GitHub’s old offline runner record may remain because this
 integration cannot manage runner registrations; it has no running VM and can
 be removed in Settings → Actions → Runners. No new runner token is needed.
 
-Cloudflare auto-deployment is disabled, including branch/PR previews. The old
-private project remains a rollback snapshot, not the primary site. Keep Access
-app `1add1fd3-ef6b-4897-ac60-390c5b60440b` protecting `tinnguyen.pages.dev` AND
-`*.tinnguyen.pages.dev`. `scripts/deploy_pages.py --check` verifies it.
-`make deploy-pages` is an explicit rollback helper only. Before restoring
-Pages, review its native deploy settings and set its `SITE_URL` to
-`https://tinnguyen.pages.dev`, rather than reactivating two auto-deployments.
+All Cloudflare deployment helpers, build commands, tests and public configuration
+files have been removed. The retired hosted project remains private and has no
+automatic deployment; this cleanup does not publish it or change its access.
 
 **The repository is public, even though the website is private.** Do not commit
 confidential drafts, private bookmarks, tokens, or personal exports. A draft

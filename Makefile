@@ -1,4 +1,4 @@
-.PHONY: build preview dev test deploy deploy-vm deploy-pages setup-vm
+.PHONY: build preview dev test deploy deploy-vm setup-vm
 UV ?= uv
 
 build:
@@ -20,8 +20,8 @@ test: preview
 	node --check public/header-art.js
 	node --check public/dither-settings.js
 	node --check public/vendor/aura-capy-shaders.js
-	python3 -m py_compile scripts/build.py scripts/bookmarks.py scripts/serve.py scripts/deploy.py scripts/deploy_pages.py
-	bash -n ops/bootstrap.sh ops/vm-update.sh ops/pages-build.sh
+	python3 -m py_compile scripts/build.py scripts/bookmarks.py scripts/serve.py scripts/deploy.py
+	bash -n ops/bootstrap.sh ops/vm-update.sh
 
 # Always regenerate reviewed content after tests; never deploy their draft preview.
 deploy: test
@@ -33,7 +33,3 @@ deploy-vm: deploy
 setup-vm: test
 	$(MAKE) build
 	python3 scripts/deploy.py --setup
-
-# Explicit Cloudflare rollback only; native auto-deploy is disabled.
-deploy-pages: test
-	python3 scripts/deploy_pages.py

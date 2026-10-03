@@ -17,7 +17,7 @@ class DeploymentPrivacyTests(unittest.TestCase):
         urlopen.return_value = self.response('private')
         ensure_private(False)
         request = urlopen.call_args.args[0]
-        self.assertEqual(request.data, b'share show tinnguyen')
+        self.assertEqual(request.data, b'share show tinng')
 
     @patch('scripts.deploy.urllib.request.urlopen')
     def test_public_deployment_is_refused(self, urlopen):
@@ -37,6 +37,16 @@ class DeploymentPrivacyTests(unittest.TestCase):
         self.assertEqual(remote('echo local', local=True), 'local output')
         self.assertEqual(run.call_args.args[0], ['bash', '-s'])
         self.assertTrue(run.call_args.kwargs['input'].startswith('set -euo pipefail'))
+
+    @patch('scripts.deploy.urllib.request.urlopen')
+    @patch('scripts.deploy.ensure_private')
+    @patch('scripts.deploy.remote')
+    def test_local_deployment_refuses_the_duplicate_or_renamed_vm(self, upload, private, urlopen):
+        urlopen.return_value = io.BytesIO(b'{"name":"not-tinng"}')
+        with self.assertRaisesRegex(RuntimeError, 'Local deployment refused'):
+            deploy(False, local=True)
+        private.assert_not_called()
+        upload.assert_not_called()
 
     @patch('scripts.deploy.ensure_private')
     @patch('scripts.deploy.remote')

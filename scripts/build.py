@@ -23,7 +23,7 @@ else:
     from bookmarks import KINDS, load_bookmarks
 
 ROOT = Path(__file__).resolve().parents[1]
-SITE_URL = os.environ.get("SITE_URL", "https://tinnguyen.exe.xyz").rstrip("/")
+SITE_URL = os.environ.get("SITE_URL", "https://tinng.exe.xyz").rstrip("/")
 ATOM = "http://www.w3.org/2005/Atom"
 SITEMAP = "http://www.sitemaps.org/schemas/sitemap/0.9"
 MARKDOWN = MarkdownIt("commonmark", {"html": False}).enable("table")
@@ -177,7 +177,7 @@ def build(root=ROOT, output=None, include_drafts=False):
 
         render("home.html", "/", title="Writing", active="writing")
         render("about.html", "/about/", title="About", active="about")
-        render("bookmarks.html", "/bookmarks/", title="Bookmarks", active="bookmarks",
+        render("reading.html", "/reading/", title="Reading", active="reading",
                has_bookmarks=True, bookmark_groups=bookmark_groups,
                bookmark_tags=bookmark_tags, bookmark_kinds=bookmark_kinds)
         render("404.html", "/404.html", title="Page not found", noindex=True)
@@ -194,7 +194,7 @@ def build(root=ROOT, output=None, include_drafts=False):
         ET.register_namespace("", SITEMAP)
         sitemap = ET.Element(f"{{{SITEMAP}}}urlset")
         published_tags = sorted({tag for post in published for tag in post.tags})
-        urls = ["/", "/about/", "/bookmarks/"] + [post.url for post in published]
+        urls = ["/", "/about/", "/reading/"] + [post.url for post in published]
         urls += [f"/tags/{tag_slug(tag)}/" for tag in published_tags]
         for path in urls:
             ET.SubElement(ET.SubElement(sitemap, f"{{{SITEMAP}}}url"), f"{{{SITEMAP}}}loc").text = SITE_URL + path

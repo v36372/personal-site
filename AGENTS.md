@@ -4,16 +4,20 @@
 - Repository: v36372/personal-site (public). Do not commit private exports,
   confidential drafts/bookmarks, credentials, or runner state. Website-private
   visibility does NOT hide the GitHub source.
-- Hosting: ONE private exeslim VM, tinnguyen.exe.xyz, nginx on port 8000.
+- Hosting: ONE private exeslim VM, tinng.exe.xyz, nginx on port 8000.
+  The user renamed the original VM to tinng. Deploy target is tinng, NOT the
+  former name. If a target is missing, inspect exe ls/rename state before
+  creating anything; NEVER recreate an old hostname after a user rename.
+  Internal /srv/tinnguyen paths and tinnguyen-update units retain their names.
   tinnguyen-ci has been DELETED; its deploy integration/key revoked. Do not
   recreate a CI VM or register a runner on the website/BB VM.
 - GitHub Actions checks PRs/main on hosted runners. The website VM polls ONLY
   v36372/personal-site main every minute via tinnguyen-update.timer, runs all
   tests then a reviewed-content build, and atomically swaps nginx releases.
   Never fetch/run PR or fork code on the website or BB VM.
-- Cloudflare auto-deployment is DISABLED. The old Pages project remains private
-  under Access app 1add1fd3-ef6b-4897-ac60-390c5b60440b (root AND wildcard).
-  Do not remove its protection or silently reactivate dual hosting.
+- No Cloudflare deployment code/config/helpers remain in this repository.
+  The retired hosted project is still private; do not alter its protection
+  or reactivate another hosting pipeline without the user asking.
 - This is an original Markdown blog: edit content/posts/ for writing, templates/
   for layouts, and public/ for assets. dist/ is generated; never edit it.
 - Run make dev for local previews, make test for checks, and git push origin
@@ -29,6 +33,9 @@
 - Current design inspiration: ludwigabap.com (compact warm monospace UI and
   bookmarks browsing). Layout CSS and templates are original; licensed shader
   and renderer adaptations have provenance in public/vendor/DITHER-NOTICES.txt.
+- Navigation is Reading (/reading/), Writing (/), About (/about/), in that
+  order. /bookmarks and /bookmarks/ redirect to /reading/ preserving queries.
+  Reading retains content/bookmarks.json and the existing filter/data schema.
 - Tin chose 'Set up tab first': content/bookmarks.json is intentionally empty.
   Do not fabricate bookmarks or fetch private collections without a supplied
   source/authorization. Private preview shows all entries; published builds
@@ -57,7 +64,9 @@
   session-local preference. Preserve reduced-motion/static fallback, theme matching,
   lazy offscreen initialization, and bounded 15fps rendering at 0.35x speed.
   Shader sources are pinned from Aura; retain MIT/Apache notices when editing.
-- Do not invent personal biography, social links, projects, or contact details.
+- Confirmed profiles: GitHub https://github.com/v36372 and X
+  https://x.com/v36372, linked in About and footer. Do not invent any other
+  biography, profiles, projects or contact details.
 - Develop here. Auto-updates build on the website VM, not on a second CI VM.
   Its personal-site-status integration allows ONLY read-only share inspection;
   no management, shell, GitHub or deployment token is needed there. Credentials

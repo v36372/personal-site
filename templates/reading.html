@@ -2,7 +2,7 @@
 {% block content %}
 <header class="page-heading library-heading">
   <p class="eyebrow">The reading shelf</p>
-  <h1>Bookmarks</h1>
+  <h1>Reading</h1>
   <p>Saved links, articles, videos, and references. All in one place.</p>
 </header>
 <div class="bookmark-controls" id="bookmark-controls" hidden>
@@ -13,11 +13,11 @@
     <select id="bookmark-tag"><option value="">All tags</option>{% for tag in bookmark_tags %}<option value="{{ tag }}">{{ tag }}</option>{% endfor %}</select>
   </div>
   <div class="bookmark-toolbar">
-    <div class="bookmark-type-tabs" role="group" aria-label="Bookmark types">
+    <div class="bookmark-type-tabs" role="group" aria-label="Reading types">
       <button type="button" data-kind="all" aria-pressed="true">All <span>{{ bookmarks|length }}</span></button>
       {% for kind, label, count in bookmark_kinds %}<button type="button" data-kind="{{ kind }}" aria-pressed="false">{{ label }} <span>{{ count }}</span></button>{% endfor %}
     </div>
-    <div class="bookmark-view-tabs" role="group" aria-label="Bookmark view">
+    <div class="bookmark-view-tabs" role="group" aria-label="Reading view">
       <button type="button" data-view="list" aria-pressed="true">List</button>
       <button type="button" data-view="timeline" aria-pressed="false">Timeline</button>
     </div>
@@ -33,8 +33,8 @@
   </section>
   {% endfor %}
 </div>
-<p class="bookmark-no-results" id="bookmark-no-results" hidden>No bookmarks match those filters. <button type="button" id="bookmark-clear">Clear filters</button></p>
-<noscript><p class="section-note">Every bookmark is listed below. Search and filters need JavaScript.</p></noscript>
+<p class="bookmark-no-results" id="bookmark-no-results" hidden>No saved links match those filters. <button type="button" id="bookmark-clear">Clear filters</button></p>
+<noscript><p class="section-note">Every saved link is listed below. Search and filters need JavaScript.</p></noscript>
 {% else %}
 <div class="bookmark-empty" id="bookmark-empty">
   <h2>No saved links.</h2>

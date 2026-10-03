@@ -89,6 +89,9 @@ h1 { margin: 0; font-size: 28px; letter-spacing: -.04em; overflow-wrap: break-wo
 .location-caption { margin-top: 16px; color: var(--muted); font-size: 11px; }
 .about-links { max-width: 720px; margin-top: 32px; }
 .about-links h2 { margin-top: 0; }
+.prose .social-links { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; font: 12px/1.7 var(--mono); }
+.social-links a { display: inline-flex; align-items: center; min-height: 44px; }
+.social-links span { color: var(--muted); font-size: 11px; }
 .article { max-width: 720px; margin: 0 auto; }
 .back-link { display: inline-block; color: var(--muted); font-size: 11px; text-decoration: none; }
 .back-link:hover { text-decoration: underline; }

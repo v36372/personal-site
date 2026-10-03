@@ -16,7 +16,7 @@ import uuid
 from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parents[1]
-VM = "tinnguyen"
+VM = "tinng"
 API = os.environ.get("EXE_API_URL", "https://exe.int.exe.xyz/exec")
 
 
@@ -82,20 +82,25 @@ setsid nohup bash -c {shlex.quote(job)} </dev/null >/dev/null 2>&1 &
 def ensure_private(use_ssh):
     # Never upload a private draft preview to a publicly shared VM.
     if use_ssh:
-        result = subprocess.run(["ssh", "exe.dev", "share show tinnguyen --json"],
+        result = subprocess.run(["ssh", "exe.dev", f"share show {VM} --json"],
                                 text=True, capture_output=True, timeout=40)
         if result.returncode:
             raise RuntimeError(result.stdout + result.stderr)
         sharing = json.loads(result.stdout)
     else:
-        request = urllib.request.Request(API, data=b"share show tinnguyen", method="POST")
+        request = urllib.request.Request(API, data=f"share show {VM}".encode(), method="POST")
         with urllib.request.urlopen(request, timeout=40) as response:
             sharing = json.loads(response.read())
     if sharing.get("status") != "private":
-        raise RuntimeError("Deployment refused: keep tinnguyen private while editing. No access settings were changed.")
+        raise RuntimeError(f"Deployment refused: keep {VM} private while editing. No access settings were changed.")
 
 
 def deploy(use_ssh, local=False):
+    if local:
+        with urllib.request.urlopen("https://reflection.int.exe.xyz/", timeout=15) as response:
+            identity = json.load(response)
+        if identity.get("name") != VM:
+            raise RuntimeError(f"Local deployment refused: this is not the {VM} VM. Check for a rename.")
     ensure_private(use_ssh)
     buffer = io.BytesIO()
     public = ROOT / "dist"
@@ -129,7 +134,7 @@ sudo systemctl reload nginx
 curl -fsS http://127.0.0.1:8000/ >/dev/null
 printf 'Deployed release: {release}\n'
 """, use_ssh, local=local))
-    print("Site: https://tinnguyen.exe.xyz/")
+    print(f"Site: https://{VM}.exe.xyz/")
 
 
 def main():

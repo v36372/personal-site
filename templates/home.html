@@ -3,9 +3,9 @@
 <section class="introduction" aria-labelledby="intro-title">
   <div class="intro-copy">
     <p class="eyebrow">A little corner of the internet</p>
-    <h1 id="intro-title">Writing &amp; bookmarks.</h1>
+    <h1 id="intro-title">Writing &amp; reading.</h1>
     <p>I'm Tin Nguyen, based in Ho Chi Minh City, Vietnam. This is a home for my writing and the things I save along the way.</p>
-    <p class="intro-links"><a href="/about/">About me</a><span aria-hidden="true"> / </span><a href="/bookmarks/">The reading shelf</a></p>
+    <p class="intro-links"><a href="/about/">About me</a><span aria-hidden="true"> / </span><a href="/reading/">The reading shelf</a></p>
   </div>
 </section>
 <div class="home-columns">
@@ -26,7 +26,7 @@
     {% endif %}
   </div>
   <section class="saved-section" aria-labelledby="saved-title">
-    <div class="section-heading"><h2 id="saved-title">Recently saved</h2><a href="/bookmarks/">All {{ bookmarks|length }} →</a></div>
+    <div class="section-heading"><h2 id="saved-title">Recently saved</h2><a href="/reading/">All {{ bookmarks|length }} →</a></div>
     {% if bookmarks %}
       {% with items=bookmarks[:5] %}{% include "_bookmark-rows.html" %}{% endwith %}
     {% else %}

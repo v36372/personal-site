@@ -3,7 +3,7 @@
 set -euo pipefail
 export PATH="/usr/local/bin:/usr/bin:/bin"
 export EXE_API_URL="https://personal-site-status.int.exe.xyz/exec"
-export SITE_URL="https://tinnguyen.exe.xyz"
+export SITE_URL="https://tinng.exe.xyz"
 export UV_PYTHON_DOWNLOADS=never
 work=/home/exedev/personal-site
 state=/srv/tinnguyen/deployed-sha
