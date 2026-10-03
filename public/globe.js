@@ -1,9 +1,9 @@
 import createGlobe from './vendor/cobe-2.0.1.js';
-import { HOME_LOCATION, HOME_VIEW, projectLocation } from './globe-location.js';
+import { HOME_LOCATION, HOME_VIEW } from './globe-location.js';
 
 const canvas = document.getElementById('globe');
 const stage = document.getElementById('globe-stage');
-const pin = document.getElementById('globe-pin');
+const fallback = document.getElementById('globe-fallback');
 const control = document.getElementById('globe-motion');
 const status = document.getElementById('globe-status');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -44,13 +44,14 @@ function unavailable() {
   destroyed = true;
   globe?.destroy();
   stage.dataset.state = 'unavailable';
-  pin.hidden = true;
   control.hidden = true;
+  fallback.removeAttribute('hidden');
   status.hidden = false;
 }
 
 function syncControl() {
-  control.textContent = paused ? 'Play motion' : 'Pause motion';
+  control.setAttribute('aria-label', (paused ? 'Play globe motion.' : 'Pause globe motion.')
+    + ' Based in Ho Chi Minh City, Vietnam');
   control.setAttribute('aria-pressed', String(paused));
   stage.dataset.paused = String(paused);
 }
@@ -74,10 +75,6 @@ function render(time) {
     // A gentle, bounded rotation keeps Ho Chi Minh City visible at all times.
     view.phi = HOME_VIEW.phi + Math.sin(motionTime * 0.35) * 0.18;
     globe.update({ phi: view.phi, theta: view.theta });
-    const position = projectLocation(HOME_LOCATION, view);
-    pin.style.left = position.x * 100 + '%';
-    pin.style.top = position.y * 100 + '%';
-    pin.hidden = !position.visible;
     stage.dataset.state = 'ready';
   }
   schedule();
@@ -92,6 +89,7 @@ try {
   const context = { alpha: true, stencil: false, antialias: true, depth: false };
   const gl = canvas.getContext('webgl2', context) || canvas.getContext('webgl', context);
   if (!gl) throw new Error('WebGL unavailable');
+  control.hidden = false;
   stage.hidden = false;
   const size = Math.round(stage.getBoundingClientRect().width);
   globe = createGlobe(canvas, {
@@ -102,13 +100,12 @@ try {
     context,
     ...globeAppearance(),
     diffuse: 1.4,
-    mapSamples: 16000,
-    // No bindable IDs: the label uses our projection instead of CSS anchors,
-    // keeping it compatible with browsers without anchor positioning.
-    markers: [{ location: HOME_LOCATION, size: 0.055 }],
+    mapSamples: 3000,
+    // Keep the city dot legible at one-line icon sizes, without a large label.
+    markers: [{ location: HOME_LOCATION, size: Math.min(0.25, 5 / size) }],
   });
   if (gl.isContextLost()) throw new Error('WebGL context lost');
-  control.hidden = false;
+  fallback.setAttribute('hidden', '');
   syncControl();
   control.addEventListener('click', () => {
     paused = !paused;

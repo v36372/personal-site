@@ -157,7 +157,7 @@ def build(root=ROOT, output=None, include_drafts=False):
                       trim_blocks=True, lstrip_blocks=True)
     env.globals["tag_slug"] = tag_slug
     context = {"site_url": SITE_URL, "year": date.today().year, "preview": include_drafts,
-               "noindex": False, "has_globe": False, "has_bookmarks": False,
+               "noindex": False, "has_bookmarks": False,
                "active": "", "published": published, "bookmarks": bookmarks,
                "drafts": drafts, "tags": tags,
                "description": "Tin Nguyen's personal blog. Based in Ho Chi Minh City, Vietnam."}
@@ -174,11 +174,11 @@ def build(root=ROOT, output=None, include_drafts=False):
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(env.get_template(template).render(context | {"path": path} | extra), encoding="utf-8")
 
-        render("home.html", "/", title="Writing", active="writing", has_globe=True)
+        render("home.html", "/", title="Writing", active="writing")
         groups = [(year, [post for post in selected if post.date.year == year])
                   for year in sorted({post.date.year for post in selected}, reverse=True)]
         render("archive.html", "/archive/", title="Archive", active="archive", groups=groups)
-        render("about.html", "/about/", title="About", active="about", has_globe=True)
+        render("about.html", "/about/", title="About", active="about")
         render("bookmarks.html", "/bookmarks/", title="Bookmarks", active="bookmarks",
                has_bookmarks=True, bookmark_groups=bookmark_groups,
                bookmark_tags=bookmark_tags, bookmark_kinds=bookmark_kinds)

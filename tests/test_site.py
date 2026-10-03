@@ -87,15 +87,25 @@ class SiteTests(unittest.TestCase):
         text = (OUTPUT / 'index.html').read_text()
         page = Page(text)
         self.assertIn(('script', {'type': 'module', 'src': '/globe.js'}), page.tags)
-        self.assertTrue(any(tag == 'figure' and attrs.get('aria-labelledby') == 'location-title'
+        self.assertTrue(any(tag == 'button' and attrs.get('id') == 'globe-motion'
+                            and 'Ho Chi Minh City' in attrs.get('aria-label', '')
                             for tag, attrs in page.tags))
         self.assertIn('Ho Chi Minh City', text)
         self.assertIn('Vietnam', text)
         self.assertIn('prefers-reduced-motion', (ASSETS / 'globe.js').read_text())
 
-    def test_reading_pages_do_not_load_globe_javascript(self):
-        for path in OUTPUT.glob('20*/*/*/*/index.html'):
-            self.assertNotIn('src="/globe.js"', path.read_text())
+    def test_globe_is_only_in_the_header_on_every_page(self):
+        for path in OUTPUT.rglob('*.html'):
+            text = path.read_text()
+            header = text.split('<header class="site-header">', 1)[1].split('</header>', 1)[0]
+            main = text.split('<main ', 1)[1].split('</main>', 1)[0]
+            self.assertEqual(text.count('id="globe"'), 1)
+            self.assertIn('id="globe"', header)
+            self.assertNotIn('id="globe"', main)
+            self.assertNotIn('globe-pin', text)
+            self.assertIn('src="/globe.js"', text)
+        css = (ASSETS / 'site.css').read_text()
+        self.assertIn('width: 1lh; height: 1lh;', css)
 
     def test_cobe_is_pinned_and_license_is_included(self):
         self.assertEqual(hashlib.sha256((ASSETS / 'vendor/cobe-2.0.1.js').read_bytes()).hexdigest(),

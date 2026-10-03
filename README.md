@@ -4,7 +4,7 @@ A compact personal notebook inspired by [ludwigabap.com](https://ludwigabap.com/
 warm monospace UI, writing and bookmarks tabs, dense saved-link lists, search,
 filters, and timeline browsing. Readable Markdown articles, archives, topics,
 and RSS remain from the earlier lucumr-inspired blog. The small COBE globe marks
-Ho Chi Minh City on the introduction and About page. Warm/light/dark themes are
+Ho Chi Minh City in the header only, as a one-text-line-sized icon. Warm/light/dark themes are
 saved locally; there are no third-party fonts, analytics, or runtime requests.
 
 Lucumr's repository is **not open source**. None of its code, templates, fonts,
@@ -129,12 +129,16 @@ example, this describes the schema (it is not an actual saved bookmark):
 [COBE](https://github.com/shuding/cobe) is pinned to **2.0.1**; its official ES
 module and MIT license are vendored in `public/vendor/`. There are no runtime
 CDN requests. `public/globe-location.js` contains the city-level coordinates
-**10.8231° N, 106.6297° E**, orientation, and label projection.
+**10.8231° N, 106.6297° E** and the city-centered orientation.
 
 `public/globe.js` owns the render loop via COBE 2's `globe.update()`. Bounded
 rotation keeps the city visible. Pause/play, reduced-motion preferences,
 offscreen/hidden-tab suspension, and no-JavaScript/WebGL fallbacks are supported.
-Articles do not load globe JavaScript, so reading works without JavaScript.
+The globe appears only beside the site name in the shared header, on every
+page. Its square is exactly one name-line high (CSS `1lh`), with no large map,
+caption, or floating pin label in the content. Click the icon to pause/play;
+its tooltip and accessible name retain the city. A small SVG location icon is
+the no-JavaScript/WebGL fallback. Reading still works without JavaScript.
 
 The CSP permits the embedded PNG with `img-src 'self' data:` and hash-allows
 COBE's empty and `:root{}` style blocks. No `unsafe-inline` or `unsafe-eval` is

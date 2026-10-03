@@ -1,13 +1,14 @@
-<figure class="location" aria-labelledby="location-title">
-  <div class="globe-stage" id="globe-stage" data-state="loading" aria-hidden="true" hidden>
-    <canvas id="globe" width="200" height="200"></canvas>
-    <span class="globe-pin" id="globe-pin" hidden>Ho Chi Minh City</span>
-  </div>
-  <figcaption>
-    <p class="location-eyebrow">Based in</p>
-    <h2 id="location-title">Ho Chi Minh City<span>, Vietnam</span></h2>
-    <button class="globe-control" id="globe-motion" type="button" aria-pressed="false" hidden>Pause motion</button>
-    <p class="globe-status" id="globe-status" hidden>The globe isn’t available in this browser.</p>
-    <noscript><p class="globe-status">Enable JavaScript to see the globe.</p></noscript>
-  </figcaption>
-</figure>
+<span class="header-location" title="Based in Ho Chi Minh City, Vietnam">
+  <svg class="globe-fallback" id="globe-fallback" viewBox="0 0 32 32" role="img" aria-label="Based in Ho Chi Minh City, Vietnam" fill="none" stroke="currentColor" stroke-width="1">
+    <circle cx="16" cy="16" r="12"></circle>
+    <ellipse cx="16" cy="16" rx="5" ry="12"></ellipse>
+    <path d="M4 16h24M6 10h20M6 22h20"></path>
+    <circle class="location-dot" cx="16" cy="16" r="1.8"></circle>
+  </svg>
+  <button class="header-globe" id="globe-motion" type="button" aria-label="Pause globe motion. Based in Ho Chi Minh City, Vietnam" aria-pressed="false" hidden>
+    <span class="globe-stage" id="globe-stage" data-state="loading" aria-hidden="true" hidden>
+      <canvas id="globe" width="64" height="64"></canvas>
+    </span>
+  </button>
+  <span class="visually-hidden" id="globe-status" hidden>The globe isn’t available in this browser. Based in Ho Chi Minh City, Vietnam.</span>
+</span>

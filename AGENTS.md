@@ -24,6 +24,8 @@
 - Only /srv/tinnguyen/current on nginx port 8000 is served through the HTTPS
   proxy. Do not serve the source root or expose admin/dev servers publicly.
 - Confirmed location: Ho Chi Minh City, Vietnam (10.8231, 106.6297). The
-  globe uses self-hosted COBE 2.0.1; see README.md for CSP and motion details.
+  globe uses self-hosted COBE 2.0.1. Keep it ONLY in the shared header, beside
+  the site name, exactly one text line high (1lh). No content-area globe or
+  large pin label. See README.md for CSP, motion, and fallback details.
 - Do not invent personal biography, social links, projects, or contact details.
 - exeslim is a deployment target without a development toolchain. Develop here.
