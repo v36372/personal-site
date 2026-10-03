@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tinnguyen.exe.xyz/sitemap.xml
