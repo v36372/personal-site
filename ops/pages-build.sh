@@ -4,4 +4,5 @@
 # This is an Access-protected draft preview, NOT a request to publish.
 set -euo pipefail
 python -m pip install uv==0.12.7
-make test
+# Python's module entrypoint works even when asdf has no shim for pip-installed uv.
+make test UV='python -m uv'
