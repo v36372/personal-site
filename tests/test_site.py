@@ -107,6 +107,31 @@ class SiteTests(unittest.TestCase):
         css = (ASSETS / 'site.css').read_text()
         self.assertIn('width: 1lh; height: 1lh;', css)
 
+    def test_dither_art_is_only_a_top_banner_on_every_page(self):
+        for path in OUTPUT.rglob('*.html'):
+            text = path.read_text()
+            main = text.split('<main ', 1)[1].split('</main>', 1)[0]
+            self.assertEqual(text.count('id="art-header"'), 1)
+            self.assertEqual(text.count('id="header-art-canvas"'), 1)
+            self.assertLess(text.index('id="art-header"'), text.index('<div class="page">'))
+            self.assertNotIn('header-art-canvas', main)
+            self.assertIn('src="/header-art.js"', text)
+            self.assertIn('aria-label="Pause header animation"', text)
+        css = (ASSETS / 'site.css').read_text()
+        self.assertIn('--art-height: 150px;', css)
+        self.assertIn('--art-height: 100px;', css)
+        self.assertIn('height: var(--art-height)', css)
+        self.assertIn("url('/header-art-fallback.svg')", css)
+        ET.parse(ASSETS / 'header-art-fallback.svg')
+
+    def test_capy_shader_provenance_and_licenses_are_preserved(self):
+        shader = ASSETS / 'vendor/aura-capy-shaders.js'
+        self.assertEqual(hashlib.sha256(shader.read_bytes()).hexdigest(),
+                         'b5234201c71050590b29d6eb1c14a81f172dd4b0a661f0d7ace3fc91947c943e')
+        self.assertIn('Apache License', (ASSETS / 'vendor/PAPER-SHADERS-APACHE-2.0.txt').read_text())
+        self.assertIn('Copyright (c) 2026 Mateo Cerquetella', (ASSETS / 'vendor/aura-LICENSE.txt').read_text())
+        self.assertIn('acaa0378891adb6fc4d6c643b4c939ecfb1997c2', (ASSETS / 'vendor/DITHER-NOTICES.txt').read_text())
+
     def test_cobe_is_pinned_and_license_is_included(self):
         self.assertEqual(hashlib.sha256((ASSETS / 'vendor/cobe-2.0.1.js').read_bytes()).hexdigest(),
                          'b4706c2a8772c5983f0872e02bbb707e551e093b32ad7c01d61dd661765097ee')

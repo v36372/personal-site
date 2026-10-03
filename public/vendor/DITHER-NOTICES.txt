@@ -1,0 +1,26 @@
+Animated header art — source and licensing
+
+Shader module: aura-capy-shaders.js
+Copied unchanged (only its extension changed from .ts to .js) from:
+https://github.com/MateoCerquetella/bb-plugins/blob/acaa0378891adb6fc4d6c643b4c939ecfb1997c2/plugins/aura/lib/capy-shaders.ts
+SHA-256: b5234201c71050590b29d6eb1c14a81f172dd4b0a661f0d7ace3fc91947c943e
+
+The GLSL is Paper Shaders by Paper Design, licensed Apache-2.0.
+Full license: PAPER-SHADERS-APACHE-2.0.txt
+Upstream: https://github.com/paper-design/shaders
+Aura's original provenance: AURA-UPSTREAM-NOTICES.txt
+That notice reports adaptation permission from Capy and records the original
+Capy bundle URLs; no Capy application, product images, fonts, authentication,
+analytics, or network services are used here.
+
+Runtime: ../header-art.js and ../dither-settings.js
+Adapted from Aura's lib/capy-effect.ts (MIT, Copyright 2026 Mateo Cerquetella).
+Full license: aura-LICENSE.txt
+Changes: removed BB/plugin/image-upload integration; scoped to a fixed-height
+website header; added a theme-aware static SVG fallback, explicit pause/play,
+session-local motion preference, a 96,000-pixel framebuffer cap, and website
+visibility/lifecycle handling. Shader strings remain unchanged.
+
+The banner layout, fade treatment, and fallback artwork are original to this
+website. Lucumr is only an inspiration for a short top-of-page art strip; no
+Lucumr source, content, or assets have been copied.

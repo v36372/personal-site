@@ -9,7 +9,8 @@
 - Drafts default to true, are visibly labeled, and are excluded from RSS and
   sitemap. make build excludes drafts; make preview includes them.
 - Current design inspiration: ludwigabap.com (compact warm monospace UI and
-  bookmarks browsing). All CSS, templates, and scripts are original.
+  bookmarks browsing). Layout CSS and templates are original; licensed shader
+  and renderer adaptations have provenance in public/vendor/DITHER-NOTICES.txt.
 - Tin chose 'Set up tab first': content/bookmarks.json is intentionally empty.
   Do not fabricate bookmarks or fetch private collections without a supplied
   source/authorization. Private preview shows all entries; published builds
@@ -27,5 +28,9 @@
   globe uses self-hosted COBE 2.0.1. Keep it ONLY in the shared header, beside
   the site name, exactly one text line high (1lh). No content-area globe or
   large pin label. See README.md for CSP, motion, and fallback details.
+- Capy-style animated dither art is ONLY a top-of-page strip: 150px desktop /
+  100px mobile, not a full-page/chat wallpaper. Preserve the pause control,
+  reduced-motion/static fallback, theme matching, and bounded 15fps rendering.
+  Shader sources are pinned from Aura; retain MIT/Apache notices when editing.
 - Do not invent personal biography, social links, projects, or contact details.
 - exeslim is a deployment target without a development toolchain. Develop here.

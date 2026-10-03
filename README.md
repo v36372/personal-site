@@ -5,7 +5,9 @@ warm monospace UI, writing and bookmarks tabs, dense saved-link lists, search,
 filters, and timeline browsing. Readable Markdown articles, archives, topics,
 and RSS remain from the earlier lucumr-inspired blog. The small COBE globe marks
 Ho Chi Minh City in the header only, as a one-text-line-sized icon. Warm/light/dark themes are
-saved locally; there are no third-party fonts, analytics, or runtime requests.
+saved locally. An animated Capy-style dither strip sits at the very top of
+every page, never behind reading content. There are no third-party fonts,
+analytics, or runtime requests.
 
 Lucumr's repository is **not open source**. None of its code, templates, fonts,
 assets, or posts have been copied. This implementation is independent.
@@ -144,6 +146,43 @@ The CSP permits the embedded PNG with `img-src 'self' data:` and hash-allows
 COBE's empty and `:root{}` style blocks. No `unsafe-inline` or `unsafe-eval` is
 allowed. Bindable IDs are omitted to avoid dynamic styles and CSS-anchor browser
 dependencies. Recheck the policy if upgrading COBE.
+
+## Animated dither header
+
+The art strip is inspired by lucumr's top-of-page composition and adapted from
+[Aura's Capy renderer](https://github.com/MateoCerquetella/bb-plugins/tree/acaa0378891adb6fc4d6c643b4c939ecfb1997c2/plugins/aura/lib).
+It is **150px tall on desktop, 100px on mobile**, full-width, fading into the
+current theme. The rest of the page has no shader/wallpaper layers.
+
+How the effect works:
+
+1. A full-screen WebGL2 quad runs Paper Shaders' fragment shader. Two layers
+   of animated simplex noise produce a drifting field of brightness.
+2. An **8×8 Bayer matrix** thresholds that field into foreground/background
+   pixels, rather than a smooth photographic gradient.
+3. The framebuffer is **one-third CSS resolution**, scaled up with
+   `image-rendering: pixelated`. This gives approximately **3px dither cells**
+   without paying for full-retina shading.
+4. The foreground comes from the theme's accent. A CSS mask fades the art to
+   transparent at the bottom, leaving the reading column entirely clear.
+
+Files and tuning:
+
+- `public/header-art.js`: website-only renderer and lifecycle; at most 15 fps,
+  pause/play (remembered within the tab), hidden-tab/offscreen suspension,
+  and static rendering for reduced motion.
+- `public/dither-settings.js`: Capy's noise/Bayer settings, 0.5× clock speed,
+  initial phase 40, and GPU caps (96,000 pixels / 4096px maximum side).
+- `templates/_header-art.html` and `public/site.css`: top-only structure,
+  height, control placement, and bottom fade.
+- `public/header-art-fallback.svg`: original static Bayer-cloud art used
+  without JavaScript/WebGL or after context loss.
+
+The shader module is copied byte-for-byte from Aura's pinned revision above
+(extension changed to .js). It is Paper Shaders **Apache-2.0**; the renderer
+adapter is **MIT**. Licenses, source hashes, Capy provenance, and modification
+notices are shipped in `public/vendor/DITHER-NOTICES.txt` and adjacent files.
+No Capy service, tracking, app code, product assets, or Lucumr code is copied.
 
 ## Deploy privately
 

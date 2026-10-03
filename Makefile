@@ -12,10 +12,13 @@ dev:
 
 test: preview
 	uv run --locked python -m unittest discover -s tests -v
-	node --test tests/globe.test.mjs
+	node --test tests/*.test.mjs
 	node --check public/globe.js
 	node --check public/theme.js
 	node --check public/bookmarks.js
+	node --check public/header-art.js
+	node --check public/dither-settings.js
+	node --check public/vendor/aura-capy-shaders.js
 	python3 -m py_compile scripts/build.py scripts/bookmarks.py scripts/serve.py scripts/deploy.py
 	bash -n ops/bootstrap.sh
 
