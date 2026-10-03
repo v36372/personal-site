@@ -15,7 +15,7 @@
       {% if published %}
         {% with entries=published[:5] %}{% include "_post-list.html" %}{% endwith %}
       {% else %}
-        <div class="empty-state"><p>No published posts yet.</p><p>The first entry will appear here.</p></div>
+        <div class="empty-state"><p>No entries.</p></div>
       {% endif %}
     </section>
     {% if drafts %}
@@ -30,7 +30,7 @@
     {% if bookmarks %}
       {% with items=bookmarks[:5] %}{% include "_bookmark-rows.html" %}{% endwith %}
     {% else %}
-      <div class="empty-state"><p>No bookmarks imported yet.</p><p>A place for the links worth keeping.</p></div>
+      <div class="empty-state"><p>No saved links.</p></div>
     {% endif %}
   </section>
 </div>

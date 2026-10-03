@@ -18,8 +18,12 @@
   git push origin main for Pages auto-deployment. make deploy verifies Access
   and rebuilds committed GitHub main, not local changes. See README.md.
   Python dependencies use uv.lock.
-- Drafts default to true, are visibly labeled, and are excluded from RSS and
-  sitemap. make build excludes drafts; make preview includes them.
+- Drafts default to true and stay out of RSS/sitemap. make preview labels them
+  for LOCAL review only. Pages runs make test then make build, serving only
+  reviewed posts/bookmarks; never publish sample drafts to hide their labels.
+- No visible work-in-progress chrome: no favicon, Private preview badge,
+  art buttons, placeholder/future-tense empty states, or unfinished About copy.
+  Removing that chrome is NOT permission to make the website public.
 - Current design inspiration: ludwigabap.com (compact warm monospace UI and
   bookmarks browsing). Layout CSS and templates are original; licensed shader
   and renderer adaptations have provenance in public/vendor/DITHER-NOTICES.txt.
@@ -44,7 +48,8 @@
   large pin label. See README.md for CSP, motion, and fallback details.
 - Capy-style animated dither art is ONLY in top/bottom bands: each 180px desktop /
   120px mobile, with a long eased fade toward the body, never behind reading.
-  Preserve synced pause controls, reduced-motion/static fallback, theme matching,
+  No visible art controls. The globe button pauses/plays ALL animations, with
+  session-local preference. Preserve reduced-motion/static fallback, theme matching,
   lazy offscreen initialization, and bounded 15fps rendering at 0.35x speed.
   Shader sources are pinned from Aura; retain MIT/Apache notices when editing.
 - Do not invent personal biography, social links, projects, or contact details.

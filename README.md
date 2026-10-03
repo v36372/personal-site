@@ -17,7 +17,7 @@ assets, or posts have been copied. This implementation is independent.
 - Repository: https://github.com/v36372/personal-site (**public source code**)
 - BB project: `tinnguyen` (`proj_p965in7xju`)
 - Source: `/home/exedev/codes/tinnguyen` on `v36372-bb`
-- Private preview: https://tinnguyen.pages.dev/
+- Website (owner-only Access): https://tinnguyen.pages.dev/
 - Hosting: Cloudflare Pages; assets served from Cloudflare's global edge
 - Build: native Pages GitHub integration, `main` → `bash ops/pages-build.sh` → `dist/`
 - Account: `700a6c6ad6178d92f1abcf67630f3a95`; project: `tinnguyen`
@@ -31,8 +31,10 @@ The rebuild helper verifies owner-only policies and anonymous login redirects
 before deploying and never changes access settings. `noindex` is not a privacy
 barrier; keep Access enabled even though the source repository is public.
 
-The starter article is explicitly a **draft/layout preview**, not a published
-post. No personal biography, employment, hobbies, or contact links are invented.
+The starter article remains an unpublished, source-only layout specimen. It is
+not included in the deployed site. No biography or published writing is invented.
+There is no custom favicon, preview badge, banner control, or unfinished-site
+copy. Empty collections use neutral messages rather than promises of future content.
 
 ## Local development
 
@@ -125,7 +127,7 @@ example, this describes the schema (it is not an actual saved bookmark):
 - `content/bookmarks.json`: saved links (currently an empty collection)
 - `scripts/bookmarks.py`: bookmark validation and safe privacy defaults
 - `templates/`: original Jinja templates; edit `about.html` for the About page
-- `public/`: CSS, favicon, and self-hosted globe assets only
+- `public/`: CSS, self-hosted renderers/shaders, and static fallbacks (no favicon)
 - `scripts/build.py`: Markdown-to-HTML generator
 - `scripts/serve.py`: local preview server with automatic rebuilds
 - `public/_headers`: Pages security headers, CSP, noindex, and pinned-vendor caching
@@ -148,8 +150,9 @@ The globe appears only beside the name and tagline in the shared header, on
 every page. Its square matches their combined height (about **56px desktop /
 52px mobile**), derived from their font sizes, line heights, and text gap.
 On very narrow screens the header actions move below to avoid overlap. No large map,
-caption, or floating pin label in the content. Click the icon to pause/play;
-its tooltip and accessible name retain the city. A small SVG location icon is
+caption, or floating pin label in the content. Click or keyboard-activate the
+icon to pause/play both the globe and dither bands; the choice is remembered
+within the tab. Its tooltip and accessible name retain the city. A small SVG location icon is
 the no-JavaScript/WebGL fallback. Reading still works without JavaScript.
 
 The CSP permits the embedded PNG with `img-src 'self' data:` and hash-allows
@@ -181,13 +184,14 @@ How the effect works:
 Files and tuning:
 
 - `public/header-art.js`: shared header/footer renderer and lifecycle; at most
-  15 fps per visible band on one animation clock. Both controls pause/play both
-  bands (remembered within the tab). Offscreen bands initialize lazily; hidden
-  tabs/offscreen bands do not animate. Reduced motion renders static art.
+  15 fps per visible band on one animation clock. No visible banner buttons;
+  the existing globe control pauses/plays all animations via motionchange.
+  Offscreen bands initialize lazily; hidden tabs/offscreen bands do not animate.
+  Reduced motion renders static art.
 - `public/dither-settings.js`: Capy's noise/Bayer settings, 0.35× clock speed,
   initial phase 40, and GPU caps (96,000 pixels / 4096px maximum side per band).
 - `templates/_header-art.html` (parameterized by position) and `public/site.css`:
-  shared structure, height, control placement, and mirrored eased fades.
+  decorative structure, height, and mirrored eased fades, without controls.
 - `public/header-art-fallback.svg`: original static Bayer-cloud art used
   without JavaScript/WebGL or after context loss.
 
@@ -212,7 +216,10 @@ Configuration:
   `SKIP_DEPENDENCY_INSTALL=true`. Disable Pages' automatic `pip install .`: this
   is a scripts-only uv project, not an installable package. The build command
   installs pinned tooling and uses `uv.lock` itself.
-- Drafts are included for private review; feeds/sitemaps still exclude drafts.
+- Run tests against a local draft preview, then regenerate with `make build`.
+  The deployed site includes only published posts and reviewed bookmarks.
+  Drafts (including the layout specimen) remain in source/local preview only.
+  This content build mode does NOT disable Access or publish the website.
 - Branch and PR preview deployments: disabled. The Access wildcard still
   protects every generated deployment URL, including production hashes.
 - Access application: `1add1fd3-ef6b-4897-ac60-390c5b60440b`, owner-only Google

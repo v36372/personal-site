@@ -8,7 +8,7 @@
   {% if preview or noindex %}<meta name="robots" content="noindex, nofollow">{% endif %}
   <title>{{ title }} — Tin Nguyen</title>
   <link rel="canonical" href="{{ site_url }}{{ path }}">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="data:,">
   <script src="/theme.js"></script>
   <link rel="stylesheet" href="/site.css">
   <link rel="alternate" type="application/rss+xml" title="Tin Nguyen's writing" href="/feed.xml">
@@ -29,7 +29,6 @@
         {% include "_globe.html" %}
       </div>
       <div class="header-actions">
-        {% if preview %}<span class="preview-status"><span aria-hidden="true">◦</span> Private preview</span>{% endif %}
         <button class="theme-control" id="theme-control" type="button" hidden>Theme: Warm</button>
       </div>
     </header>

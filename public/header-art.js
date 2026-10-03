@@ -19,7 +19,6 @@ function createBand(banner) {
   const surface = banner.querySelector('.art-surface');
   const canvas = surface.querySelector('canvas');
   const fallback = surface.querySelector('.art-fallback');
-  const control = banner.querySelector('.art-motion');
   const phase = banner.dataset.art === 'footer' ? 12 : 0;
   let visible = false;
   let lost = false;
@@ -29,10 +28,7 @@ function createBand(banner) {
   const shaders = [];
   const uniforms = {};
 
-  function syncControl() {
-    const action = paused ? 'Play' : 'Pause';
-    control.textContent = `${action} art`;
-    control.setAttribute('aria-label', `${action} art animations (${banner.dataset.art} control)`);
+  function syncMotion() {
     banner.dataset.paused = String(paused);
   }
 
@@ -51,7 +47,6 @@ function createBand(banner) {
     release();
     canvas.hidden = true;
     fallback.hidden = false;
-    control.hidden = true;
     banner.dataset.state = 'fallback';
     schedule();
   }
@@ -130,7 +125,6 @@ function createBand(banner) {
       palette();
       resize();
       if (gl.isContextLost()) throw new Error('WebGL context lost');
-      control.hidden = false;
     } catch {
       unavailable();
     }
@@ -144,15 +138,13 @@ function createBand(banner) {
   }
 
   function destroy() {
-    control.removeEventListener('click', toggleMotion);
     canvas.removeEventListener('webglcontextlost', unavailable);
     release();
   }
 
-  control.addEventListener('click', toggleMotion);
   canvas.addEventListener('webglcontextlost', unavailable);
-  syncControl();
-  return { banner, surface, syncControl, palette, draw, resize, setVisible, destroy,
+  syncMotion();
+  return { banner, surface, syncMotion, palette, draw, resize, setVisible, destroy,
     get active() { return visible && !lost && !!program; } };
 }
 
@@ -185,17 +177,16 @@ function schedule() {
   if (!paused && bands.some(band => band.active)) frame = requestAnimationFrame(tick);
 }
 
-function toggleMotion() {
-  paused = !paused;
-  manuallyPaused = paused;
-  try { sessionStorage.setItem('tn-art-paused', paused ? '1' : '0'); } catch { /* In-memory preference. */ }
-  bands.forEach(band => band.syncControl());
+function changeSharedMotion(event) {
+  paused = event.detail.paused;
+  manuallyPaused = event.detail.manuallyPaused;
+  bands.forEach(band => band.syncMotion());
   schedule();
 }
 
 function changeMotion(event) {
   paused = event.matches || manuallyPaused;
-  bands.forEach(band => band.syncControl());
+  bands.forEach(band => band.syncMotion());
   schedule();
 }
 
@@ -226,6 +217,7 @@ function pageHide(event) {
   document.removeEventListener('visibilitychange', schedule);
   reduced.removeEventListener('change', changeMotion);
   window.removeEventListener('themechange', changeTheme);
+  window.removeEventListener('motionchange', changeSharedMotion);
   window.removeEventListener('pagehide', pageHide);
   window.removeEventListener('pageshow', pageShow);
   bands.forEach(band => band.destroy());
@@ -239,5 +231,6 @@ function pageShow() {
 document.addEventListener('visibilitychange', schedule);
 reduced.addEventListener('change', changeMotion);
 window.addEventListener('themechange', changeTheme);
+window.addEventListener('motionchange', changeSharedMotion);
 window.addEventListener('pagehide', pageHide);
 window.addEventListener('pageshow', pageShow);

@@ -3,10 +3,11 @@ import base64
 import hashlib
 from html.parser import HTMLParser
 from pathlib import Path
+import tempfile
 import unittest
 from urllib.parse import unquote, urljoin, urlparse
 import xml.etree.ElementTree as ET
-from scripts.build import SITE_URL, load_posts, tag_slug
+from scripts.build import SITE_URL, build, load_posts, tag_slug
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / 'dist'
@@ -63,9 +64,36 @@ class SiteTests(unittest.TestCase):
         text = (OUTPUT / 'index.html').read_text()
         self.assertIn(('link', {'rel': 'canonical', 'href': SITE_URL + '/'}), Page(text).tags)
         if not self.published:
-            self.assertIn('No published posts yet.', text)
+            self.assertIn('No entries.', text)
         if self.drafts:
-            self.assertIn('Draft preview', text)
+            self.assertIn('class="draft-label">Draft</span>', text)
+
+    def test_shared_chrome_has_no_preview_badge_art_buttons_or_custom_favicon(self):
+        for path in OUTPUT.rglob('*.html'):
+            text = path.read_text()
+            self.assertNotIn('preview-status', text)
+            self.assertNotIn('Private preview', text)
+            self.assertNotIn('Pause art', text)
+            self.assertNotIn('Play art', text)
+            self.assertNotIn('/favicon.svg', text)
+            self.assertIn(('link', {'rel': 'icon', 'href': 'data:,'}), Page(text).tags)
+        self.assertFalse((OUTPUT / 'favicon.svg').exists())
+
+    def test_pages_content_build_excludes_drafts_and_all_wip_copy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'site'
+            build(ROOT, output=output)
+            for post in self.drafts:
+                self.assertFalse((output / post.url.lstrip('/')).exists())
+            for path in output.rglob('*.html'):
+                text = path.read_text()
+                for phrase in ('Private preview', 'Pause art', 'Play art', 'layout preview',
+                               'still taking shape', 'will appear', 'imported yet', 'shared yet',
+                               'draft-label', 'draft-notice', 'waiting for its first post'):
+                    with self.subTest(page=str(path.relative_to(output)), phrase=phrase):
+                        self.assertNotIn(phrase, text)
+            self.assertFalse((output / 'favicon.svg').exists())
+            self.assertIn('make build', (ROOT / 'ops/pages-build.sh').read_text())
 
     def test_private_preview_is_noindex(self):
         for path in OUTPUT.rglob('*.html'):
@@ -122,7 +150,7 @@ class SiteTests(unittest.TestCase):
                 self.assertEqual(text.count(f'id="art-{position}"'), 1)
                 self.assertEqual(text.count(f'id="{position}-art-canvas"'), 1)
                 self.assertNotIn(f'{position}-art-canvas', main)
-                self.assertIn(f'aria-label="Pause art animations ({position} control)"', text)
+                self.assertNotIn('class="art-motion"', text)
             self.assertLess(text.index('id="art-header"'), text.index('<div class="page">'))
             self.assertGreater(text.index('id="art-footer"'), text.index('</footer>'))
             self.assertIn('src="/header-art.js"', text)

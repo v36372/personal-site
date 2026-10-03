@@ -18,7 +18,8 @@ Adapted from Aura's lib/capy-effect.ts (MIT, Copyright 2026 Mateo Cerquetella).
 Full license: aura-LICENSE.txt
 Changes: removed BB/plugin/image-upload integration; scoped to a fixed-height
 website header/footer; added mirrored eased fades, a slower shared clock, lazy
-offscreen initialization, a theme-aware static SVG fallback, synced pause/play,
+offscreen initialization, a theme-aware static SVG fallback, shared globe-based
+pause/play without visible banner controls,
 session-local motion preference, a 96,000-pixel framebuffer cap per band, and
 website visibility/lifecycle handling. Shader strings remain unchanged.
 

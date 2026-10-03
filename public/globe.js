@@ -13,7 +13,9 @@ let lastDraw = 0;
 let previousTime = 0;
 let motionTime = 0;
 let inView = true;
-let paused = reducedMotion.matches;
+let manuallyPaused = false;
+try { manuallyPaused = sessionStorage.getItem('tn-art-paused') === '1'; } catch { /* Storage may be disabled. */ }
+let paused = reducedMotion.matches || manuallyPaused;
 let destroyed = false;
 const view = { ...HOME_VIEW };
 
@@ -50,10 +52,13 @@ function unavailable() {
 }
 
 function syncControl() {
-  control.setAttribute('aria-label', (paused ? 'Play globe motion.' : 'Pause globe motion.')
-    + ' Based in Ho Chi Minh City, Vietnam');
+  const action = paused ? 'Play' : 'Pause';
+  control.setAttribute('aria-label', action + ' animations. Based in Ho Chi Minh City, Vietnam');
+  control.title = action + ' animations';
   control.setAttribute('aria-pressed', String(paused));
   stage.dataset.paused = String(paused);
+  // The existing globe control also handles the decorative art; no banner buttons.
+  window.dispatchEvent(new CustomEvent('motionchange', { detail: { paused, manuallyPaused } }));
 }
 
 function schedule() {
@@ -109,11 +114,13 @@ try {
   syncControl();
   control.addEventListener('click', () => {
     paused = !paused;
+    manuallyPaused = paused;
+    try { sessionStorage.setItem('tn-art-paused', paused ? '1' : '0'); } catch { /* In-memory preference. */ }
     previousTime = 0;
     syncControl();
   });
   reducedMotion.addEventListener('change', (event) => {
-    paused = event.matches;
+    paused = event.matches || manuallyPaused;
     previousTime = 0;
     syncControl();
   });
