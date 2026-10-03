@@ -13,7 +13,8 @@ tests use Python 3 and Node.js 22+; the deployment VM needs only nginx.
 - Base image: `ghcr.io/ryanlewis/exeslim:latest` at creation
 - Resources: 1 vCPU, 2 GB RAM, 10 GB disk
 - Server: nginx, managed by systemd, listening on port 8000
-- Public assets: `/srv/tinnguyen/current` (symlink to a release)
+- Served assets: `/srv/tinnguyen/current` (symlink to a release)
+- Visibility: **private**, protected by exe.dev owner authentication while editing
 
 exeslim is the minimal deployment image; development stays on the BB VM.
 Only `public/` is uploaded and served. Source, tests, and operations files
@@ -74,15 +75,18 @@ release symlink atomically, and checks the local HTTP endpoint. Old releases
 are retained for manual rollback. HTTPS API uploads have a 64 KiB request limit;
 use `--ssh` if the site grows beyond that. No credentials are stored here.
 
-exe.dev handles TLS. The proxy is configured for port 8000 and public access.
-To restore these settings using your owner SSH access:
+exe.dev handles TLS. The proxy is configured for port 8000 and **private**
+access. Anonymous visitors are redirected to exe.dev login. Keep it private
+until Tin explicitly asks to publish; normal deployments do not change access.
+
+To restore the private settings using your owner SSH access:
 
 ```sh
 ssh exe.dev share port tinnguyen 8000
-ssh exe.dev share set-public tinnguyen
+ssh exe.dev share set-private tinnguyen
 ```
 
-Only the static website on the default proxy port is public, not SSH access.
+Do not enable public access or create share links while the site is being edited.
 
 ## Operations
 
