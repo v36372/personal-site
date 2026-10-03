@@ -14,6 +14,7 @@ assets, or posts have been copied. This implementation is independent.
 
 ## Project and privacy
 
+- Repository: https://github.com/v36372/personal-site (**public source code**)
 - BB project: `tinnguyen` (`proj_p965in7xju`)
 - Source: `/home/exedev/codes/tinnguyen` on `v36372-bb`
 - Private preview: https://tinnguyen.exe.xyz/
@@ -214,6 +215,47 @@ ssh exe.dev share set-private tinnguyen
 
 Feeds and all article URLs remain behind the same private proxy authentication.
 `make build` is a content build mode, not an instruction to publish or share.
+
+## Automatic deployment (self-hosted GitHub Actions)
+
+`.github/workflows/deploy.yml` runs on pushes to `main` and manual dispatches
+on `main`. It does **not** run on pull requests. The repository/ref guard,
+read-only GitHub token, pinned checkout action, and serialized deployment group
+are intentional; do not broaden them to untrusted PR code.
+
+- Dedicated runner VM: `tinnguyen-ci.exe.xyz` (exeslim; 1 vCPU, 2 GB, 10 GB).
+- Repo-scoped runner: `tinnguyen-ci`; custom label `personal-site-deploy`.
+- Persistent service: `actions.runner.v36372-personal-site.tinnguyen-ci.service`.
+- Jobs execute `make deploy`: all checks, a private draft-preview build, and
+  atomic deployment to the existing `tinnguyen` VM. The website VM remains
+  a minimal nginx host; no build tools or GitHub runner are installed there.
+- The runner uses `EXE_API_URL=https://personal-site-deploy.int.exe.xyz/exec`.
+  Its bearer key is held by exe.dev, not in GitHub secrets, the repository, or
+  the runner's environment. Allowed commands: `ssh tinnguyen` and `share show`;
+  no VM creation/removal or visibility changes. The key expires **2027-10-03**;
+  rotate the `personal-site-ci-deploy` key and proxy credential before then.
+- Enrollment used a short-lived registration token through a temporary,
+  caller-verified exe.dev peer route. The token file and bootstrap peer were
+  deleted after registration. Runner-generated credentials remain protected
+  on the dedicated CI VM.
+- `ops/runner-bootstrap.sh` records checksummed runner/Node releases and the
+  hash-pinned uv tool used to prepare this machine. The runner auto-updates.
+
+**The repository is public, even though the website is private.** Do not commit
+private bookmarks, confidential drafts, tokens, or personal exports to it.
+A `draft=true` or `publish=false` flag affects generated pages, not GitHub
+source visibility. Make the repo private or use a separate private data source
+before storing information that must remain confidential.
+
+Inspect/restart the runner using owner access:
+
+```sh
+ssh tinnguyen-ci.exe.xyz 'sudo systemctl status actions.runner.v36372-personal-site.tinnguyen-ci.service --no-pager'
+ssh tinnguyen-ci.exe.xyz 'sudo journalctl -u actions.runner.v36372-personal-site.tinnguyen-ci.service -n 50 --no-pager'
+```
+
+Actions: https://github.com/v36372/personal-site/actions
+Keep this public-repo self-hosted runner limited to trusted main-branch code.
 
 ## Operations
 

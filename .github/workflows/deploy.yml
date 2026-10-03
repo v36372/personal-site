@@ -1,0 +1,34 @@
+name: Deploy private website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: personal-site-private-preview
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'v36372/personal-site' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, x64, personal-site-deploy]
+    timeout-minutes: 15
+    env:
+      EXE_API_URL: https://personal-site-deploy.int.exe.xyz/exec
+    steps:
+      - name: Check out trusted main commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Verify build tools
+        run: |
+          python3 --version
+          node --version
+          uv --version
+      - name: Test, build, and deploy private preview
+        run: make deploy

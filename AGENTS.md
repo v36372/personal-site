@@ -1,7 +1,15 @@
 # Personal website
 
 - Working source: /home/exedev/codes/tinnguyen on the BB VM.
+- Repository: v36372/personal-site (public). Do not commit private exports,
+  confidential drafts/bookmarks, credentials, or runner state. Website-private
+  visibility does NOT hide the GitHub source.
 - Deployment VM: tinnguyen.exe.xyz, image ghcr.io/ryanlewis/exeslim:latest.
+- Auto deployment: .github/workflows/deploy.yml, trusted main pushes only,
+  on repo-scoped runner tinnguyen-ci (label personal-site-deploy). Never run
+  untrusted pull-request code on this self-hosted machine.
+- CI uses the vault-backed personal-site-deploy integration, scoped to
+  ssh tinnguyen / share show; credential expires 2027-10-03. See README.md.
 - This is an original Markdown blog: edit content/posts/ for writing, templates/
   for layouts, and public/ for assets. dist/ is generated; never edit it.
 - Run make dev for local auto-rebuilding previews, make test for checks, and

@@ -20,7 +20,7 @@ test: preview
 	node --check public/dither-settings.js
 	node --check public/vendor/aura-capy-shaders.js
 	python3 -m py_compile scripts/build.py scripts/bookmarks.py scripts/serve.py scripts/deploy.py
-	bash -n ops/bootstrap.sh
+	bash -n ops/bootstrap.sh ops/runner-bootstrap.sh
 
 deploy: test
 	python3 scripts/deploy.py
