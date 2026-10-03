@@ -1,14 +1,16 @@
-"""Dependency-free checks for the static site and deployment configuration."""
+"""Checks for generated HTML, navigation, feed, globe, and privacy defaults."""
 import base64
 import hashlib
 from html.parser import HTMLParser
 from pathlib import Path
 import unittest
-from urllib.parse import urlparse
+from urllib.parse import unquote, urljoin, urlparse
 import xml.etree.ElementTree as ET
+from scripts.build import load_posts, tag_slug
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLIC = ROOT / "public"
+OUTPUT = ROOT / 'dist'
+ASSETS = ROOT / 'public'
 
 
 class Page(HTMLParser):
@@ -22,84 +24,109 @@ class Page(HTMLParser):
 
 
 class SiteTests(unittest.TestCase):
-    def test_pages_have_language_viewport_title_and_main(self):
-        for path in PUBLIC.glob("*.html"):
-            with self.subTest(page=path.name):
+    @classmethod
+    def setUpClass(cls):
+        cls.posts = load_posts(ROOT)
+        cls.published = [post for post in cls.posts if not post.draft]
+        cls.drafts = [post for post in cls.posts if post.draft]
+
+    def test_pages_have_language_viewport_title_and_one_main_heading(self):
+        pages = list(OUTPUT.rglob('*.html'))
+        self.assertGreaterEqual(len(pages), 4)
+        for path in pages:
+            with self.subTest(page=str(path.relative_to(OUTPUT))):
                 page = Page(path.read_text())
-                self.assertIn(("html", {"lang": "en"}), page.tags)
-                self.assertTrue(any(tag == "title" for tag, _ in page.tags))
-                self.assertTrue(any(tag == "main" for tag, _ in page.tags))
-                self.assertTrue(any(attrs.get("name") == "viewport" for _, attrs in page.tags))
-                self.assertEqual(sum(tag == "h1" for tag, _ in page.tags), 1)
+                self.assertIn(('html', {'lang': 'en'}), page.tags)
+                self.assertTrue(any(tag == 'title' for tag, _ in page.tags))
+                self.assertTrue(any(tag == 'main' for tag, _ in page.tags))
+                self.assertTrue(any(attrs.get('name') == 'viewport' for _, attrs in page.tags))
+                self.assertEqual(sum(tag == 'h1' for tag, _ in page.tags), 1)
+                self.assertTrue(any(tag == 'nav' and attrs.get('aria-label') == 'Main navigation'
+                                    for tag, attrs in page.tags))
 
-    def test_local_assets_and_links_exist(self):
-        for path in PUBLIC.glob("*.html"):
-            for tag, attrs in Page(path.read_text()).tags:
-                for key in ("href", "src"):
-                    value = attrs.get(key, "")
-                    if not value or urlparse(value).scheme or value.startswith("#"):
+    def test_every_local_link_and_asset_exists(self):
+        for path in OUTPUT.rglob('*.html'):
+            page_url = '/' + str(path.relative_to(OUTPUT)).removesuffix('index.html')
+            for _, attrs in Page(path.read_text()).tags:
+                for key in ('href', 'src'):
+                    value = attrs.get(key, '')
+                    if not value or urlparse(value).scheme or value.startswith('#'):
                         continue
-                    target = PUBLIC / value.lstrip("/")
+                    target_url = urlparse(urljoin(page_url, value))
+                    target = OUTPUT / unquote(target_url.path).lstrip('/')
                     if target.is_dir():
-                        target = target / "index.html"
-                    with self.subTest(page=path.name, link=value):
-                        self.assertTrue(target.is_file())
+                        target = target / 'index.html'
+                    with self.subTest(page=str(path), link=value):
+                        self.assertTrue(target.is_file(), target)
 
-    def test_homepage_has_correct_canonical(self):
-        self.assertIn(
-            ("link", {"rel": "canonical", "href": "https://tinnguyen.exe.xyz/"}),
-            Page((PUBLIC / "index.html").read_text()).tags,
-        )
+    def test_homepage_has_correct_canonical_and_honest_empty_state(self):
+        text = (OUTPUT / 'index.html').read_text()
+        self.assertIn(('link', {'rel': 'canonical', 'href': 'https://tinnguyen.exe.xyz/'}), Page(text).tags)
+        if not self.published:
+            self.assertIn('No published posts yet.', text)
+        if self.drafts:
+            self.assertIn('Draft preview', text)
 
-    def test_sitemap_has_correct_hostname(self):
-        tree = ET.parse(PUBLIC / "sitemap.xml")
-        urls = tree.findall(".//{http://www.sitemaps.org/schemas/sitemap/0.9}loc")
-        self.assertEqual([url.text for url in urls], ["https://tinnguyen.exe.xyz/"])
+    def test_private_preview_is_noindex(self):
+        for path in OUTPUT.rglob('*.html'):
+            self.assertIn(('meta', {'name': 'robots', 'content': 'noindex, nofollow'}), Page(path.read_text()).tags)
+        self.assertIn('Disallow: /', (OUTPUT / 'robots.txt').read_text())
 
-    def test_404_is_not_indexed(self):
-        self.assertIn(
-            ("meta", {"name": "robots", "content": "noindex"}),
-            Page((PUBLIC / "404.html").read_text()).tags,
-        )
-
-    def test_no_symlinks_or_secrets_in_public_directory(self):
-        for path in PUBLIC.rglob("*"):
-            self.assertFalse(path.is_symlink())
-            self.assertFalse(path.name.startswith("."))
+    def test_drafts_are_not_in_feed_or_sitemap(self):
+        items = ET.parse(OUTPUT / 'feed.xml').findall('.//item')
+        self.assertEqual([item.findtext('title') for item in items], [post.title for post in self.published[:20]])
+        sitemap = ET.parse(OUTPUT / 'sitemap.xml')
+        urls = [node.text for node in sitemap.findall('.//{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
+        expected = ['/', '/archive/', '/about/'] + [post.url for post in self.published]
+        expected += ['/tags/' + tag_slug(tag) + '/' for tag in sorted({tag for post in self.published for tag in post.tags})]
+        self.assertEqual(urls, ['https://tinnguyen.exe.xyz' + path for path in expected])
+        for post in self.drafts:
+            self.assertNotIn('https://tinnguyen.exe.xyz' + post.url, urls)
 
     def test_globe_is_progressive_and_location_is_accessible(self):
-        page = Page((PUBLIC / "index.html").read_text())
-        self.assertIn(("script", {"type": "module", "src": "/globe.js"}), page.tags)
-        self.assertTrue(any(tag == "figure" and attrs.get("aria-labelledby") == "location-title"
+        text = (OUTPUT / 'index.html').read_text()
+        page = Page(text)
+        self.assertIn(('script', {'type': 'module', 'src': '/globe.js'}), page.tags)
+        self.assertTrue(any(tag == 'figure' and attrs.get('aria-labelledby') == 'location-title'
                             for tag, attrs in page.tags))
-        self.assertTrue(any(tag == "canvas" and attrs.get("id") == "globe" for tag, attrs in page.tags))
-        self.assertIn("Ho Chi Minh City", (PUBLIC / "index.html").read_text())
-        self.assertIn("Vietnam", (PUBLIC / "index.html").read_text())
-        self.assertIn("prefers-reduced-motion", (PUBLIC / "globe.js").read_text())
+        self.assertIn('Ho Chi Minh City', text)
+        self.assertIn('Vietnam', text)
+        self.assertIn('prefers-reduced-motion', (ASSETS / 'globe.js').read_text())
+
+    def test_reading_pages_do_not_load_globe_javascript(self):
+        for path in OUTPUT.glob('20*/*/*/*/index.html'):
+            self.assertNotIn('src="/globe.js"', path.read_text())
 
     def test_cobe_is_pinned_and_license_is_included(self):
-        vendor = PUBLIC / "vendor/cobe-2.0.1.js"
-        self.assertEqual(hashlib.sha256(vendor.read_bytes()).hexdigest(),
-                         "b4706c2a8772c5983f0872e02bbb707e551e093b32ad7c01d61dd661765097ee")
-        self.assertIn("Copyright (c) 2021 Shu Ding", (PUBLIC / "vendor/cobe-LICENSE.txt").read_text())
+        self.assertEqual(hashlib.sha256((ASSETS / 'vendor/cobe-2.0.1.js').read_bytes()).hexdigest(),
+                         'b4706c2a8772c5983f0872e02bbb707e551e093b32ad7c01d61dd661765097ee')
+        self.assertIn('Copyright (c) 2021 Shu Ding', (ASSETS / 'vendor/cobe-LICENSE.txt').read_text())
 
     def test_csp_allows_cobe_without_unsafe_inline_or_eval(self):
-        config = (ROOT / "ops/nginx.conf").read_text()
-        for style in (b"", b":root{}"):
+        config = (ROOT / 'ops/nginx.conf').read_text()
+        for style in (b'', b':root{}'):
             style_hash = base64.b64encode(hashlib.sha256(style).digest()).decode()
             self.assertIn("'sha256-" + style_hash + "'", config)
         self.assertIn("img-src 'self' data:", config)
         self.assertNotIn("'unsafe-inline'", config)
         self.assertNotIn("'unsafe-eval'", config)
 
-    def test_nginx_only_exposes_public_release(self):
-        config = (ROOT / "ops/nginx.conf").read_text()
-        self.assertIn("listen 8000 default_server;", config)
-        self.assertIn("root /srv/tinnguyen/current;", config)
-        self.assertIn("autoindex off;", config)
-        self.assertIn("try_files $uri $uri/ =404;", config)
-        self.assertIn("Content-Security-Policy", config)
+    def test_output_contains_no_source_secrets_or_symlinks(self):
+        for path in OUTPUT.rglob('*'):
+            self.assertFalse(path.is_symlink())
+            self.assertFalse(path.name.startswith('.'))
+            self.assertNotEqual(path.suffix, '.md')
+        self.assertFalse((OUTPUT / 'templates').exists())
+        self.assertFalse((OUTPUT / 'content').exists())
+        self.assertFalse((OUTPUT / 'README.md').exists())
+
+    def test_nginx_only_exposes_generated_release(self):
+        config = (ROOT / 'ops/nginx.conf').read_text()
+        self.assertIn('listen 8000 default_server;', config)
+        self.assertIn('root /srv/tinnguyen/current;', config)
+        self.assertIn('autoindex off;', config)
+        self.assertIn('try_files $uri $uri/ =404;', config)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

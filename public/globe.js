@@ -90,7 +90,7 @@ try {
     mapBrightness: 1.6,
     baseColor: [0.76, 0.79, 0.71],
     markerColor: [0.74, 0.45, 0.33],
-    glowColor: [0.957, 0.949, 0.925],
+    glowColor: [0.973, 0.969, 0.953],
     // No bindable IDs: the label uses our projection instead of CSS anchors,
     // keeping it compatible with browsers without anchor positioning.
     markers: [{ location: HOME_LOCATION, size: 0.055 }],

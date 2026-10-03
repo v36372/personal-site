@@ -2,7 +2,14 @@
 
 - Working source: /home/exedev/codes/tinnguyen on the BB VM.
 - Deployment VM: tinnguyen.exe.xyz, image ghcr.io/ryanlewis/exeslim:latest.
-- This is a static site: edit public/, run make test, deploy with make deploy.
+- This is an original Markdown blog: edit content/posts/ for writing, templates/
+  for layouts, and public/ for assets. dist/ is generated; never edit it.
+- Run make dev for local auto-rebuilding previews, make test for checks, and
+  make deploy to upload a private preview. Python dependencies use uv.lock.
+- Drafts default to true, are visibly labeled, and are excluded from RSS and
+  sitemap. make build excludes drafts; make preview includes them.
+- Lucumr is design inspiration only. Its repository is not open source; do not
+  copy its code, templates, assets, fonts, or posts.
 - The exe integration at https://exe.int.exe.xyz/exec provides owner-authenticated
   API access from this BB VM. Do not request or write API tokens into the repo.
 - Keep the website PRIVATE while Tin is editing. Do not enable public access

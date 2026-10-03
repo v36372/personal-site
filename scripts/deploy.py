@@ -3,6 +3,7 @@
 import argparse
 import base64
 import io
+import json
 import os
 from pathlib import Path
 import shlex
@@ -77,9 +78,28 @@ setsid nohup bash -c {shlex.quote(job)} </dev/null >/dev/null 2>&1 &
     raise RuntimeError(f"Bootstrap timed out; inspect {work}/log")
 
 
+def ensure_private(use_ssh):
+    # Never upload a private draft preview to a publicly shared VM.
+    if use_ssh:
+        result = subprocess.run(["ssh", "exe.dev", "share show tinnguyen --json"],
+                                text=True, capture_output=True, timeout=40)
+        if result.returncode:
+            raise RuntimeError(result.stdout + result.stderr)
+        sharing = json.loads(result.stdout)
+    else:
+        request = urllib.request.Request(API, data=b"share show tinnguyen", method="POST")
+        with urllib.request.urlopen(request, timeout=40) as response:
+            sharing = json.loads(response.read())
+    if sharing.get("status") != "private":
+        raise RuntimeError("Deployment refused: keep tinnguyen private while editing. No access settings were changed.")
+
+
 def deploy(use_ssh):
+    ensure_private(use_ssh)
     buffer = io.BytesIO()
-    public = ROOT / "public"
+    public = ROOT / "dist"
+    if not (public / "index.html").is_file():
+        raise RuntimeError("No generated site found. Run make preview or make build first.")
     with tarfile.open(fileobj=buffer, mode="w:gz") as archive:
         for path in sorted(public.rglob("*")):
             if path.is_symlink():
@@ -118,7 +138,7 @@ def main():
         if args.setup:
             bootstrap(args.ssh)
         deploy(args.ssh)
-    except (RuntimeError, OSError) as error:
+    except (RuntimeError, OSError, ValueError) as error:
         parser.exit(1, str(error) + "\n")
 
 

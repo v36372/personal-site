@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="article">
+  <a class="back-link" href="/">← All writing</a>
+  <header class="article-header">
+    {% if post.draft %}<span class="draft-label">Draft · layout preview</span>{% endif %}
+    <h1>{{ post.title }}</h1>
+    <p class="article-meta">{% if post.draft %}Draft dated{% else %}Written on{% endif %} <time datetime="{{ post.date.isoformat() }}">{{ post.date.strftime('%B') }} {{ post.date.day }}, {{ post.date.year }}</time><span aria-hidden="true"> · </span>{{ post.reading_minutes }} min read</p>
+  </header>
+  {% if post.draft %}<aside class="draft-notice" aria-label="Draft notice">This is an unpublished draft for the private preview. It is not included in the RSS feed.</aside>{% endif %}
+  <div class="prose">{{ post.html | safe }}</div>
+  {% if post.tags %}<footer class="article-tags"><span>Filed under</span>{% for tag in post.tags %}<a href="/tags/{{ tag_slug(tag) }}/">{{ tag }}</a>{% endfor %}</footer>{% endif %}
+</article>
+<nav class="article-navigation" aria-label="More writing">
+  {% if older %}<a href="{{ older.url }}"><span>← Older entry</span>{{ older.title }}</a>{% endif %}
+  {% if newer %}<a href="{{ newer.url }}"><span>Newer entry →</span>{{ newer.title }}</a>{% endif %}
+  {% if not older and not newer %}<a href="/archive/">Browse the archive →</a>{% endif %}
+</nav>
+{% endblock %}

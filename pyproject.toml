@@ -1,0 +1,9 @@
+[project]
+name = "tinnguyen-blog"
+version = "0.1.0"
+description = "Tin Nguyen's static, Markdown-authored personal blog"
+requires-python = ">=3.11"
+dependencies = [
+  "Jinja2>=3.1.6,<4",
+  "markdown-it-py>=4.0.0,<5",
+]
