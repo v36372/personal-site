@@ -122,6 +122,25 @@ class SiteTests(unittest.TestCase):
         self.assertIn('Vietnam', text)
         self.assertIn('prefers-reduced-motion', (ASSETS / 'globe.js').read_text())
 
+    def test_globe_uses_an_on_globe_label_and_explicit_location_opt_in(self):
+        text = (OUTPUT / 'about/index.html').read_text()
+        page = Page(text)
+        self.assertNotIn('location-caption', text)
+        self.assertIn('<text id="globe-label-home">HCMC</text>', text)
+        for marker in ('server', 'visitor'):
+            self.assertTrue(any(attrs.get('id') == 'globe-label-' + marker
+                                and 'hidden' in attrs for _, attrs in page.tags))
+        self.assertTrue(any(tag == 'button' and attrs.get('id') == 'globe-location'
+                            and 'hidden' in attrs and attrs.get('aria-pressed') == 'false'
+                            and attrs.get('aria-describedby') == 'globe-location-privacy'
+                            for tag, attrs in page.tags))
+        self.assertTrue(any(attrs.get('id') == 'globe-location-status'
+                            and attrs.get('role') == 'status' for _, attrs in page.tags))
+        self.assertIn('not saved or sent to this website', text)
+        geolocation = (ASSETS / 'globe-geolocation.js').read_text()
+        for forbidden in ('fetch(', 'watchPosition(', 'localStorage', 'sessionStorage', 'sendBeacon'):
+            self.assertNotIn(forbidden, geolocation)
+
     def test_globe_is_large_and_loaded_only_on_about(self):
         for path in OUTPUT.rglob('*.html'):
             text = path.read_text()

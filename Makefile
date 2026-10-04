@@ -15,6 +15,8 @@ test: preview
 	$(UV) run --locked python -m unittest discover -s tests -v
 	node --test tests/*.test.mjs
 	node --check public/globe.js
+	node --check public/globe-location.js
+	node --check public/globe-geolocation.js
 	node --check public/theme.js
 	node --check public/bookmarks.js
 	node --check public/header-art.js

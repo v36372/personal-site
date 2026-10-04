@@ -8,6 +8,11 @@
   <button class="globe-control" id="globe-motion" type="button" aria-label="Pause animations. Based in Ho Chi Minh City, Vietnam" title="Pause animations" aria-pressed="false" hidden>
     <span class="globe-stage" id="globe-stage" data-state="loading" aria-hidden="true" hidden>
       <canvas id="globe" width="240" height="240"></canvas>
+      <svg class="globe-labels" id="globe-labels" viewBox="0 0 240 240" hidden>
+        <text id="globe-label-home">HCMC</text>
+        <text id="globe-label-server" hidden>SGP</text>
+        <text id="globe-label-visitor" hidden>You</text>
+      </svg>
     </span>
   </button>
   <span class="visually-hidden" id="globe-status" hidden>The globe isn’t available in this browser. Based in Ho Chi Minh City, Vietnam.</span>

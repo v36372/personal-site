@@ -149,12 +149,26 @@ rotation keeps the city visible. Pause/play, reduced-motion preferences,
 offscreen/hidden-tab suspension, and no-JavaScript/WebGL fallbacks are supported.
 The globe appears ONLY in the About content, beside the introduction on desktop
 and stacked below it on mobile. Its square is **240px desktop / 200px mobile**.
-A small caption names the city. The shared header has no globe; other pages do
-not load its script or COBE, keeping GPU work and downloads off the writing page.
+The city has an on-globe **HCMC** label; there is no city caption below it.
+The shared header has no globe; other pages do not load its script or COBE,
+keeping GPU work and downloads off the writing page.
 The larger renderer uses 16,000 map samples, bounded 30fps animation, and DPR ≤2.
 Click or keyboard-activate the globe to pause/play it and both dither bands;
 the choice is remembered throughout the tab. The tooltip/accessible name retain
 the city. An SVG is the no-JavaScript/WebGL fallback. Reading still works without JS.
+
+By default (including denied/unavailable location), **only Ho Chi Minh City**
+is marked, with no arcs or Singapore marker. Clicking **Connect your location**
+explicitly requests a one-shot browser location. After permission and a valid
+position, arcs connect each pair of HCMC, **You**, and **SGP** (Singapore city
+center, the hosting region rather than a precise VM address). The view reframes
+all three markers, including distant visitors. Visitor coordinates are rounded
+to 0.1° immediately and remain in memory only: no IP lookup, geocoding service,
+watcher, storage, analytics, or upload. **Remove my location**, permission
+revocation, and leaving the page (including back/forward cache) restore the
+home-only view. Errors and timeouts also retain that default.
+`public/globe-geolocation.js` owns consent/lifecycle; `globe-location.js` owns
+coarse coordinates, connections, and projection.
 
 The CSP permits the embedded PNG with `img-src 'self' data:` and hash-allows
 COBE's empty and `:root{}` style blocks. No `unsafe-inline` or `unsafe-eval` is

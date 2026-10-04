@@ -57,7 +57,13 @@
   self-hosted COBE 2.0.1 globe lives ONLY in the About content: 240px desktop,
   200px mobile, alongside the introduction / stacked on narrow screens.
   Never load COBE or globe.js on other pages, or put a globe in the header.
-  Keep city marker, accessible pause/play, reduced motion, and fallbacks.
+  Keep the on-globe HCMC marker/label (no city caption below), accessible
+  pause/play, reduced motion, and fallbacks. Default/denied location shows ONLY
+  HCMC, no arcs or server marker. Request one-shot browser geolocation ONLY
+  after an explicit click; with consent, connect HCMC, the visitor, and
+  Singapore (VM region, city-level coordinates). Round visitor coordinates
+  to 0.1°, keep them browser-memory-only, and clear on removal/revocation/
+  pagehide. No IP lookups, geocoding services, storage, or location uploads.
 - Capy-style animated dither art is ONLY in top/bottom bands: each 180px desktop /
   120px mobile, with a long eased fade toward the body, never behind reading.
   No visible art controls. The About globe pauses/plays ALL animations, with

@@ -8,7 +8,9 @@
   </div>
   <figure class="about-location">
     {% include "_globe.html" %}
-    <figcaption class="location-caption">Ho Chi Minh City, Vietnam</figcaption>
+    <button class="location-control" id="globe-location" type="button" aria-pressed="false" aria-describedby="globe-location-privacy" title="Connect an approximate location. It stays in your browser and is not saved or sent to this website." hidden>Connect your location</button>
+    <span class="visually-hidden" id="globe-location-privacy">Optional: allow location to connect you, my city, and the server in Singapore. Your approximate location stays in your browser and is not saved or sent to this website.</span>
+    <span class="visually-hidden" id="globe-location-status" role="status" aria-live="polite"></span>
   </figure>
 </div>
 <section class="about-links prose" aria-labelledby="around-title">
