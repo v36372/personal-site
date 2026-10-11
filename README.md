@@ -29,10 +29,10 @@ the HTTPS proxy; nginx serves only generated HTML/assets on port 8000. Deploys
 check private sharing and never change visibility. `noindex` is not an access
 barrier. GitHub source remains public even though the website is private.
 
-The starter article remains an unpublished, source-only layout specimen. It is
-not included in the deployed site. No biography or published writing is invented.
-There is no custom favicon, preview badge, banner control, or unfinished-site
-copy. Empty collections use neutral messages rather than promises of future content.
+Published writing comes from reviewed Markdown in `content/posts/`. Drafts stay
+out of the deployed site, RSS, and sitemap. The starter layout specimen has been
+removed. There is no custom favicon, preview badge, banner control, or
+unfinished-site copy. Empty collections use neutral messages.
 
 ## Local development
 
@@ -77,8 +77,6 @@ quotes, fenced code blocks, and tables are supported. Raw HTML is escaped.
 - URLs use `/YYYY/MM/DD/slug/`; choose a stable slug and publication date.
 - Descriptions are optional; otherwise the first text block is used.
 - Drafts are never in RSS or the sitemap, even during private preview.
-- Delete or replace `content/posts/2026-10-03-a-little-corner.md` before publishing
-  real writing. It is only a specimen of the article layout.
 
 Navigation, topic pages, reading times, and feeds are generated
 from the posts. No manual index editing is needed.
