@@ -7,113 +7,55 @@ tags = ["AI", "Hardware"]
 draft = false
 +++
 
-I'd just acquired an ASUS GX10 and wanted to try a local model on a practical
-problem. My sister's iPhone 11 had an owner lock after her Apple account was
-hacked. I wanted to investigate whether open-source tools could get it working
-again.
+## Objective
 
-I ran CYBER-FROST, an abliterated model, through
-[Pi](https://github.com/earendil-works/pi). Abliteration modifies a model to
-reduce refusal behavior. I chose it to explore the hacking route, with the
-agent researching tools and working through the software.
+I'd just [acquired an ASUS GX10](https://x.com/v36372/status/2108218774642139543)
+and wanted to try a local model on a practical problem. My sister's iPhone 11
+had an owner lock after her Apple account was hacked. The goal was to get it
+working again with open-source tools.
 
-The GX10 ran the model. A Mac mini handled builds and the phone's USB
-connection. The experiment combined repository research, firmware preparation,
-and testing on the device.
+## Setup
 
-![An iPhone displaying boot logs beside a Mac mini and a small repair board on a wooden desk.](/images/iphone-pi-session.jpg)
+The GX10 ran
+[CYBER-FROST](https://huggingface.co/vcruz305/CYBER-FROST-3.8-EXL3-SAGE-3.87bpw)
+through [Pi](https://github.com/earendil-works/pi). I chose it to explore the
+hacking route with a model modified to reduce refusals. A Mac mini handled the
+builds and the phone's USB connection.
 
-*My setup during the experiment. The GX10 running the model is not pictured.*
+I also used a B4 Pico phone-repair board built around Raspberry Pi's RP2350A
+microcontroller. It has USB-C and a Lightning plug. The board handles the
+low-level USB interaction needed for the boot-ROM exploit, which ordinary Mac
+USB tooling cannot perform. It is not a stock Raspberry Pi Pico 2.
 
-## What the experiment achieved
+![An iPhone displaying boot logs beside a Mac mini and a B4 Pico phone-repair board on a wooden desk.](/images/iphone-pi-session.jpg)
 
-The agent identified the phone's software and activation state, investigated
-community tooling, built firmware components, and obtained SSH access. We
-eventually booted a modified system that got through the local setup flow.
+*The Mac mini, iPhone, and B4 Pico. The GX10 is not pictured.*
 
-That established useful low-level access, but the original recovery goal
-remained unresolved. The system was tethered, so restarting required the board
-and Mac. Cellular services were disabled in an attempt to address instability.
-Long-term stability was not established.
+## Journey
 
-The result was an experimental device rather than a recovered everyday phone.
-That distinction matters when evaluating what the agent accomplished.
+The agent checked the phone's firmware and activation state, researched
+community tools, and adapted their builds for the Mac. We moved from firmware
+preparation to board-assisted boot tests, then worked on an SSH-enabled system
+and a modified setup flow.
 
-## Device access and account authorization are different
+## Difficulties
 
-A root shell gives access to the device's software. It does not establish that
-Apple has removed the account association or authorized activation.
+Board compatibility and device recovery took much of the work. Guides for
+related RP2350 boards did not settle compatibility with the B4's wiring and
+firmware. A Mac USB listing also could not show the whole setup while the
+phone was connected to the board.
 
-Changing the local setup flow and removing a server-side owner record are
-separate outcomes. This experiment demonstrated the former, not the latter.
-Apple documents [account-side removal separately](https://support.apple.com/en-us/108934).
+One file-deletion experiment was followed by a boot failure. A restore got the
+phone booting again on newer firmware, which changed the conditions for later
+tests.
 
-The same distinction applies to functionality. Booting a modified system does
-not establish that its modem, security services, and ordinary apps work as they
-did on the stock system. Those functions need their own tests.
+## Results
 
-## What I'd require for another experiment
+We got SSH access and booted a modified system that passed the local setup
+flow. The phone remained tethered. Reboots needed the board and Mac. We
+disabled cellular services while investigating instability, and a short
+uptime check did not establish long-term stability.
 
-### Verify the exact hardware
-
-Compatibility depends on the board's wiring and firmware, not only its chip.
-A model can find documentation for a related board without establishing that
-those instructions apply to the hardware in use.
-
-Host diagnostics also have limits. A phone absent from the Mac's USB inventory
-may still be running while connected to another device. Tool output needs to
-be interpreted against the current connection, rather than treated as a
-complete view of the setup.
-
-For another experiment, I'd keep the verified hardware configuration and
-connection state in a short reference note.
-
-### Test recovery before changing protected state
-
-One file-deletion experiment was followed by a boot failure. We recovered by
-restoring newer firmware, which changed the conditions for subsequent tests.
-
-Recovery therefore needs to be part of the experiment design. A backup should
-be verified, and the restore procedure should be tested before a destructive
-change. Restoring a different firmware version may recover the device without
-recovering the original test environment.
-
-### Preserve confirmed facts across long sessions
-
-Pi condensed older context during this session. The original records remained
-available, but later model requests used summaries.
-
-A useful summary needs the current firmware version, confirmed hardware
-configuration, and recovery status. It should distinguish observations from
-explanations that still need testing. I can't attribute a particular error to
-compaction, but these facts need to remain available as the investigation
-continues.
-
-### Test the intended use, not only the boot process
-
-Firmware verification, shell access, and a successful boot answer different
-questions. None replaces a test of cellular service or sustained operation
-away from the host computer.
-
-After disabling cellular services, the session recorded a short uptime check.
-That was insufficient to establish long-term stability or identify the cause
-of earlier shutdowns. A configuration change and a verified fix are different
-results.
-
-For a recovery task, I'd define the required functions before modifying the
-device and test them independently afterward.
-
-## Where a local agent helped
-
-The agent was useful for finding repositories, comparing tool support, and
-adapting the build environment. It could connect information from different
-projects and turn it into software we could test on the phone.
-
-The abliterated model was willing to investigate the tooling route. That did
-not establish compatibility or a working recovery procedure. Those remained
-engineering checks.
-
-I'd continue using the GX10 for this kind of research and build work, with
-on-device changes limited to reviewed procedures and a verified recovery path.
-For my sister's phone, full recovery remained unresolved at the end of the
-experiment.
+That was device access, not evidence that Apple had removed the account
+association. The result was a research device, not a fully recovered everyday
+phone.
