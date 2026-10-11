@@ -2,7 +2,7 @@
 title = "Root access is not a working phone"
 date = 2026-10-11
 slug = "root-access-is-not-a-working-phone"
-description = "I used CYBER-FROST on an ASUS GX10 to investigate a locked iPhone. Low-level access did not produce a fully recovered phone."
+description = "A Qwen3.8-Flash-Next derivative on an ASUS GX10 helped boot a locked iPhone into modified iOS 27.0.1. Full recovery remained unresolved."
 tags = ["AI", "Hardware"]
 draft = false
 +++
@@ -12,13 +12,19 @@ and wanted to try a local model on a practical problem. My sister's iPhone 11
 had an owner lock after her Apple account was hacked. The goal was to see
 whether open-source tools could get it working again.
 
-I ran
-[CYBER-FROST](https://huggingface.co/vcruz305/CYBER-FROST-3.8-EXL3-SAGE-3.87bpw)
-through [Pi](https://github.com/earendil-works/pi). I chose it to explore the
-hacking route with a model modified to reduce refusals. The GX10 handled model
-inference, while a Mac mini handled the builds and USB communication with the
-phone. The agent could research projects and prepare software on the Mac, but
-the device tests still depended on the physical setup.
+I wanted to test an abliterated model, one altered to suppress refusal
+behavior. I chose
+[CYBER-FROST-3.8](https://huggingface.co/vcruz305/CYBER-FROST-3.8-EXL3-SAGE-3.87bpw),
+Blackfrost-AI's security-fine-tuned derivative of Qwen3.8-Flash-Next, and ran it
+through [Pi](https://github.com/earendil-works/pi). Its model card describes a
+proprietary behavioral modification aimed at reducing refusals, without
+publishing the exact method. I used vcruz305's EXL3/SAGE quantized pack, at 3.87
+bits per weight for the model body, to fit the weights on the GX10.
+
+The GX10 handled model inference, while a Mac mini handled the builds and USB
+communication with the phone. The agent could research projects and prepare
+software on the Mac, but the device tests still depended on the physical
+setup.
 
 The investigation started with the phone's firmware and activation state. The
 agent compared community projects, checked their support, and prepared
@@ -40,16 +46,17 @@ Raspberry Pi Pico 2.
 
 Board compatibility needed its own checks. Guides for related RP2350 boards
 did not establish compatibility with the B4's vendor firmware and wiring.
-The connection also affected what the Mac could observe. Its USB inventory could show the
-board without showing the phone attached to it, so a missing device entry did
-not establish that the phone had stopped running.
+The connection also affected what the Mac could observe. Its USB inventory
+could show the board without showing the phone attached to it, so a missing
+device entry did not establish that the phone had stopped running.
 
 We obtained SSH access and could inspect the phone's software.
 That allowed on-device experiments, but it did not make every filesystem
 operation reliable. Backup attempts returned permission errors during one
 protected-file experiment. A later file deletion was followed by a boot
-failure. A restore got the phone booting again on newer firmware, which
-changed the conditions for subsequent builds and tests.
+failure. A restore got the phone booting again on newer firmware, replacing
+the original iOS 18.0 environment and changing the conditions for subsequent
+builds and tests.
 
 The investigation also ran long enough for Pi to condense older context. The
 original records remained available, but later requests used shorter
@@ -57,10 +64,12 @@ summaries. Those summaries needed to keep the current firmware version and
 hardware configuration, and distinguish a successful build from a confirmed
 result on the device.
 
-We booted a modified system that got through the local setup flow.
-It remained tethered. Restarting required the board and Mac, rather than an
-ordinary reboot into an independently usable phone. That dependency was part
-of the result, even though the system could boot and accept an SSH connection.
+By the end, the iPhone was running modified iOS 27.0.1, build 24A446, using
+[Liter8](https://github.com/Xplo8E/Liter8) after the usbliter8 stage. It was still
+iOS, not Linux or another replacement OS. We got through the local setup flow
+and obtained SSH access. It remained tethered. Every reboot needed the board
+and Mac to repeat the boot process, rather than restarting into an
+independently usable phone.
 
 Getting past setup did not establish that Apple had removed the account
 association. Root access lets us inspect files and change local software.
@@ -70,12 +79,23 @@ The experiment demonstrated a modified local setup flow, not removal of that
 record.
 
 There were limits to functionality too. We disabled cellular services while
-investigating instability. A short uptime check afterward did not establish
-long-term stability or prove the cause of earlier shutdowns. It also could not
-show that the phone would work as an everyday device away from the host
-computer.
+investigating instability, so our final configuration did not establish
+working calls or mobile data. Liter8's documentation also lists the Secure
+Enclave, passcodes, and Apple services as not working. Those are documented
+project limitations, not independent findings from this session. The
+final recorded uptime was about eight minutes. That did not establish
+long-term stability or prove the cause of earlier shutdowns.
 
 The local agent helped with repository research and adapting the build
 environment. We got low-level access and software running on the phone. For my
 sister, though, full recovery remained unresolved. The result was a tethered
 research device, not a recovered everyday phone.
+
+Next I want to experiment with
+[PiDurableKit](https://github.com/finnvoor/PiDurableKit), a Swift interface to
+pi-durable for Apple platforms. It persists conversations and agent execution
+state so work can continue after an app restart. Interrupted tool calls are
+replayed only when declared safe to repeat. I want to test that recovery
+behavior with the model still running on the GX10. This is an experiment in
+agent durability and controlled tool replay, not another activation-removal
+method.
