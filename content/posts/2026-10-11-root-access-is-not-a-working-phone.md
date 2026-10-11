@@ -91,6 +91,26 @@ environment. We got low-level access and software running on the phone. For my
 sister, though, full recovery remained unresolved. The result was a tethered
 research device, not a recovered everyday phone.
 
+Across all saved branches and five compaction summaries, Pi reported 195.7
+million accounted tokens. That includes 3.17 million uncached input tokens,
+192.05 million cached input tokens, and 492,455 output tokens. The cached count
+represents context reused across requests, not that much new text.
+
+For a hosted API-cost estimate, I used
+[NinjaChat's Qwen3.8-Flash-Next pricing](https://docs.ninjachat.ai/api-reference/models/chat/qwen-3-8-flash-next),
+checked on October 11, 2026. Per million tokens, the rates are $0.15 for
+uncached input, $0.016 for cached input, and $0.47 for output. Repricing this
+recorded usage gives about $3.78 if the same cache hits were available, or
+$29.51 with all input billed uncached. This prices the base hosted Qwen model,
+not CYBER-FROST, and is not an actual invoice. Hardware and electricity are
+excluded.
+
+The 580 completed responses with recorded durations on October 11 produced
+133,790 output tokens over 4,101 seconds of response time, about 32.6 output
+tokens per second. The median response duration was 6.0 seconds. This is a
+client-side response-rate estimate on cached agent requests, not an isolated
+GPU decode benchmark. Wattage and energy were not recorded.
+
 Next I want to experiment with
 [PiDurableKit](https://github.com/finnvoor/PiDurableKit), a Swift interface to
 pi-durable for Apple platforms. It persists conversations and agent execution
@@ -98,4 +118,6 @@ state so work can continue after an app restart. Interrupted tool calls are
 replayed only when declared safe to repeat. I want to test that recovery
 behavior with the model still running on the GX10. This is an experiment in
 agent durability and controlled tool replay, not another activation-removal
-method.
+method. For that run I also want server-side prefill and decode timings, plus
+wall-outlet power logging for the GX10 and Mac, so I can report measured watts
+and kWh.
