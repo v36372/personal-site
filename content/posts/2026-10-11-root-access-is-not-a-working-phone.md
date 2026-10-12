@@ -7,6 +7,8 @@ tags = ["AI", "Hardware"]
 draft = false
 +++
 
+*This post was AI-generated and audited by a human.*
+
 I'd just [acquired an ASUS GX10](https://x.com/v36372/status/2108218774642139543)
 and wanted to try a local model on a practical problem. My sister's iPhone 11
 had an owner lock after her Apple account was hacked. The goal was to see
