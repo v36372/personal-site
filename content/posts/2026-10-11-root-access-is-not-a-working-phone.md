@@ -65,59 +65,36 @@ hardware configuration, and distinguish a successful build from a confirmed
 result on the device.
 
 By the end, the iPhone was running modified iOS 27.0.1, build 24A446, using
-[Liter8](https://github.com/Xplo8E/Liter8) after the usbliter8 stage. It was still
-iOS, not Linux or another replacement OS. We got through the local setup flow
-and obtained SSH access. It remained tethered. Every reboot needed the board
-and Mac to repeat the boot process, rather than restarting into an
-independently usable phone.
+[Liter8](https://github.com/Xplo8E/Liter8) after the usbliter8 stage. We got
+through the local setup flow and obtained SSH access. It remained tethered.
+Every reboot needed the board and Mac to repeat the boot process.
 
-Getting past setup did not establish that Apple had removed the account
-association. Root access lets us inspect files and change local software.
-Apple's server-side owner record and activation authorization are separate.
-Apple documents [account-side removal separately](https://support.apple.com/en-us/108934).
-The experiment demonstrated a modified local setup flow, not removal of that
-record.
+Root access lets us inspect files and change local software. Apple manages
+the owner record and activation authorization on its servers. The account
+association remained unresolved. Apple documents
+[account-side removal](https://support.apple.com/en-us/108934).
 
 There were limits to functionality too. We disabled cellular services while
 investigating instability, so our final configuration did not establish
 working calls or mobile data. Liter8's documentation also lists the Secure
-Enclave, passcodes, and Apple services as not working. Those are documented
-project limitations, not independent findings from this session. The
-final recorded uptime was about eight minutes. That did not establish
-long-term stability or prove the cause of earlier shutdowns.
+Enclave, passcodes, and Apple services as not working. The final recorded
+uptime was about eight minutes. Long-term stability and the cause of earlier
+shutdowns remained unconfirmed.
 
 The local agent helped with repository research and adapting the build
-environment. We got low-level access and software running on the phone. For my
-sister, though, full recovery remained unresolved. The result was a tethered
-research device, not a recovered everyday phone.
+environment. We got low-level access and software running on the phone. Full
+recovery for my sister remained unresolved. We finished with a tethered
+research device.
 
-Across all saved branches and five compaction summaries, Pi reported 195.7
-million accounted tokens. That includes 3.17 million uncached input tokens,
-192.05 million cached input tokens, and 492,455 output tokens. The cached count
-represents context reused across requests, not that much new text.
-
-For a hosted API-cost estimate, I used
-[NinjaChat's Qwen3.8-Flash-Next pricing](https://docs.ninjachat.ai/api-reference/models/chat/qwen-3-8-flash-next),
-checked on October 11, 2026. Per million tokens, the rates are $0.15 for
-uncached input, $0.016 for cached input, and $0.47 for output. Repricing this
-recorded usage gives about $3.78 if the same cache hits were available, or
-$29.51 with all input billed uncached. This prices the base hosted Qwen model,
-not CYBER-FROST, and is not an actual invoice. Hardware and electricity are
-excluded.
-
-The 580 completed responses with recorded durations on October 11 produced
-133,790 output tokens over 4,101 seconds of response time, about 32.6 output
-tokens per second. The median response duration was 6.0 seconds. This is a
-client-side response-rate estimate on cached agent requests, not an isolated
-GPU decode benchmark. Wattage and energy were not recorded.
+Pi recorded about 195.7 million tokens across the session, mostly cached
+context reused between requests. Using current
+[Qwen3.8 token prices](https://docs.ninjachat.ai/api-reference/models/chat/qwen-3-8-flash-next),
+I estimate that usage at about $3.78 with the same cache reuse, or $29.51 if
+all input were billed uncached.
 
 Next I want to experiment with
 [PiDurableKit](https://github.com/finnvoor/PiDurableKit), a Swift interface to
 pi-durable for Apple platforms. It persists conversations and agent execution
 state so work can continue after an app restart. Interrupted tool calls are
-replayed only when declared safe to repeat. I want to test that recovery
-behavior with the model still running on the GX10. This is an experiment in
-agent durability and controlled tool replay, not another activation-removal
-method. For that run I also want server-side prefill and decode timings, plus
-wall-outlet power logging for the GX10 and Mac, so I can report measured watts
-and kWh.
+replayed only when declared safe to repeat. I want to test agent state
+recovery and controlled tool replay with the model still running on the GX10.
