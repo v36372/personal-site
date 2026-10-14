@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "title": "How to serve trillions of tokens for trillion-parameter coding agents",
+    "url": "https://modal.com/blog/trillion-tokens-trillion-parameters",
+    "kind": "article",
+    "publish": true
+  },
+  {
+    "title": "How to Build Wealth as a Career Person",
+    "url": "https://asheradeniyi.com/2026/04/10/how-to-build-wealth-as-a-career-person/",
+    "kind": "article",
+    "publish": true
+  },
+  {
+    "title": "A Staff Engineer's Guide to Inventing Work",
+    "url": "https://sujithjay.com/inventing-work",
+    "kind": "article",
+    "publish": true
+  }
+]
